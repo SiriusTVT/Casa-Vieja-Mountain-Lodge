@@ -1,0 +1,8 @@
+/* Estilos para el Formulario de Reserva */
+    .booking-form { max-width: 600px; margin: 30px auto; display: flex; flex-direction: column; gap: 15px; text-align: left; background: var(--white); padding: 30px; border-radius: 8px; box-shadow: var(--shadow); border: 1px solid var(--line); }
+    .booking-form input, .booking-form textarea { width: 100%; padding: 12px 15px; border: 1px solid rgba(125, 4, 29, .3); border-radius: 4px; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: var(--deep); background: var(--cream); }
+    .booking-form input:focus, .booking-form textarea:focus { outline: none; border-color: var(--forest); box-shadow: 0 0 0 2px rgba(125,4,29,.15); background: var(--white); }
+    .booking-form label { font-size: 12px; font-weight: 700; color: var(--forest); letter-spacing: .05em; text-transform: uppercase; margin-bottom: -8px; z-index: 1; }
+    .booking-form .date-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .booking-form .date-field { display: flex; flex-direction: column; gap: 15px; }
+    .booking-form button { margin-top: 10px; width: 100%; border: none; cursor: pointer; text-align: center; }

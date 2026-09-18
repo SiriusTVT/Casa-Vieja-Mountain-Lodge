@@ -177,6 +177,13 @@
     .contact { text-align: center; background: var(--sage); }
     .contact p { max-width: 580px; margin: 0 auto 25px; font-size: 19px; }
     .contact .button { background: var(--forest); color: var(--white); }
+    .booking-form { max-width: 600px; margin: 30px auto; display: flex; flex-direction: column; gap: 15px; text-align: left; background: var(--white); padding: 30px; border-radius: 8px; box-shadow: var(--shadow); border: 1px solid var(--line); }
+    .booking-form input, .booking-form textarea { width: 100%; padding: 12px 15px; border: 1px solid rgba(125, 4, 29, .3); border-radius: 4px; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: var(--deep); background: var(--cream); }
+    .booking-form input:focus, .booking-form textarea:focus { outline: none; border-color: var(--forest); box-shadow: 0 0 0 2px rgba(125,4,29,.15); background: var(--white); }
+    .booking-form label { font-size: 12px; font-weight: 700; color: var(--forest); letter-spacing: .05em; text-transform: uppercase; margin-bottom: -8px; z-index: 1; }
+    .booking-form .date-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .booking-form .date-field { display: flex; flex-direction: column; gap: 15px; }
+    .booking-form button { margin-top: 10px; width: 100%; border: none; cursor: pointer; text-align: center; }
     .contact-links { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 24px auto 30px; }
     .contact-links a { display: inline-block; border: 1px solid rgba(31,75,58,.35); border-radius: 100px; padding: 10px 14px; color: var(--forest); text-decoration: none; font: 700 12px Arial, Helvetica, sans-serif; }
     .contact-links a:hover { background: var(--forest); color: var(--white); }
@@ -644,10 +651,40 @@
   </section>
 
   <section class="contact" id="contacto">
-    <div class="eyebrow">Tu próxima pausa puede empezar aquí</div>
-    <h2>¿Listos para desconectarse?</h2>
-    <p>Escríbenos para consultar disponibilidad y diseñar una experiencia de alojamiento, naturaleza y bienestar a tu medida.</p>
-    <p lang="en">For further information or reservations, please <strong>contact us on WhatsApp</strong>.</p>
+    <div class="eyebrow">Planifica tu visita</div>
+    <h2>Reserva y Disponibilidad</h2>
+    <p>Déjanos tus datos y fechas tentativas. Nuestro administrador se comunicará contigo a la brevedad para confirmar la disponibilidad y finalizar tu reserva.</p>
+
+    <form class="booking-form" action="#" method="POST">
+      <label for="nombre">Nombre Completo</label>
+      <input type="text" id="nombre" name="nombre" required placeholder="Ej. Juan Pérez">
+
+      <label for="email">Correo Electrónico</label>
+      <input type="email" id="email" name="email" required placeholder="ejemplo@correo.com">
+
+      <label for="telefono">Teléfono / WhatsApp</label>
+      <input type="tel" id="telefono" name="telefono" required placeholder="+57 300 000 0000">
+
+      <div class="date-group">
+        <div class="date-field">
+          <label for="llegada">Fecha de Llegada</label>
+          <input type="date" id="llegada" name="llegada" required>
+        </div>
+        <div class="date-field">
+          <label for="salida">Fecha de Salida</label>
+          <input type="date" id="salida" name="salida" required>
+        </div>
+      </div>
+
+      <label for="huespedes">Número de Huéspedes</label>
+      <input type="number" id="huespedes" name="huespedes" min="1" required placeholder="Ej. 2">
+
+      <label for="mensaje">Solicitudes Especiales / Comentarios</label>
+      <textarea id="mensaje" name="mensaje" rows="3" placeholder="¿Celebras alguna ocasión especial o tienes alguna restricción alimentaria?"></textarea>
+
+      <button type="submit" class="button button-light">Enviar Solicitud de Reserva</button>
+    </form>
+
     <figure class="location-map"><img src="imagenes_zapia/imagen_04.jpg" alt="Mapa ilustrado de la ruta Cali a Casa Vieja Mountain Lodge"><figcaption>Ruta Cali — Casa Vieja Mountain Lodge</figcaption></figure>
     <p class="address">📍 Km 1 Vía La Ruiza, Buitrera Palmira, Valle del Cauca</p>
     <div class="contact-links">
