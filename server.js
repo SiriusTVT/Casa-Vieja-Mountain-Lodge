@@ -4,7 +4,7 @@ const path = require('node:path');
 
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
-const ROOT = __dirname;
+const PUBLIC_ROOT = path.join(__dirname, 'public');
 
 const MIME_TYPES = {
   '.css': 'text/css; charset=utf-8',
@@ -29,9 +29,9 @@ function send(response, statusCode, contentType, body) {
 const server = http.createServer((request, response) => {
   const requestPath = decodeURIComponent(request.url.split('?')[0]);
   const relativePath = requestPath === '/' ? 'index.html' : requestPath.slice(1);
-  const filePath = path.resolve(ROOT, relativePath);
+  const filePath = path.resolve(PUBLIC_ROOT, relativePath);
 
-  if (!filePath.startsWith(ROOT + path.sep)) {
+  if (!filePath.startsWith(PUBLIC_ROOT + path.sep)) {
     send(response, 403, 'text/plain; charset=utf-8', 'Acceso denegado');
     return;
   }
