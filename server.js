@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const PORT = Number(process.env.PORT) || 3000;
-const HOST = process.env.HOST || 'localhost';
+const HOST = process.env.HOST || '0.0.0.0';
 const ROOT = __dirname;
 
 const MIME_TYPES = {
@@ -49,5 +49,5 @@ const server = http.createServer((request, response) => {
 });
 
 server.listen(PORT, HOST, () => {
-  console.log(`Casa Vieja disponible en http://${HOST}:${PORT}`);
+  console.log(`Casa Vieja disponible en el puerto ${PORT}`);
 });
