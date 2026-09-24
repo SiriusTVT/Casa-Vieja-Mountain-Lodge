@@ -183,6 +183,9 @@
     .booking-form label { font-size: 12px; font-weight: 700; color: var(--forest); letter-spacing: .05em; text-transform: uppercase; margin-bottom: -8px; z-index: 1; }
     .booking-form .date-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
     .booking-form .date-field { display: flex; flex-direction: column; gap: 15px; }
+    .booking-form .date-note { margin-top: -8px; color: var(--moss); font: 12px Arial, Helvetica, sans-serif; }
+    .booking-form .quote-option { display: flex; align-items: flex-start; gap: 10px; margin: 0; text-transform: none; letter-spacing: 0; line-height: 1.4; }
+    .booking-form .quote-option input { width: auto; margin: 3px 0 0; accent-color: var(--forest); }
     .booking-form button { margin-top: 10px; width: 100%; border: none; cursor: pointer; text-align: center; }
     .contact-links { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 24px auto 30px; }
     .contact-links a { display: inline-block; border: 1px solid rgba(31,75,58,.35); border-radius: 100px; padding: 10px 14px; color: var(--forest); text-decoration: none; font: 700 12px Arial, Helvetica, sans-serif; }
@@ -652,10 +655,10 @@
 
   <section class="contact" id="contacto">
     <div class="eyebrow">Planifica tu visita</div>
-    <h2>Reserva y Disponibilidad</h2>
-    <p>Déjanos tus datos y fechas tentativas. Nuestro administrador se comunicará contigo a la brevedad para confirmar la disponibilidad y finalizar tu reserva.</p>
+    <h2>Cotiza tu Escape a la Montaña</h2>
+    <p>Déjanos tu nombre y contacto y te enviaremos una propuesta hecha a tu medida.</p>
 
-    <form class="booking-form" action="#" method="POST">
+    <form class="booking-form" id="booking-form">
       <label for="nombre">Nombre Completo</label>
       <input type="text" id="nombre" name="nombre" required placeholder="Ej. Juan Pérez">
 
@@ -672,9 +675,10 @@
         </div>
         <div class="date-field">
           <label for="salida">Fecha de Salida</label>
-          <input type="date" id="salida" name="salida" required>
+          <input type="date" id="salida" name="salida" readonly required aria-describedby="salida-ayuda">
         </div>
       </div>
+      <small id="salida-ayuda" class="date-note">La salida se calcula automáticamente para el día siguiente.</small>
 
       <label for="huespedes">Número de Huéspedes</label>
       <input type="number" id="huespedes" name="huespedes" min="1" required placeholder="Ej. 2">
@@ -682,7 +686,12 @@
       <label for="mensaje">Solicitudes Especiales / Comentarios</label>
       <textarea id="mensaje" name="mensaje" rows="3" placeholder="¿Celebras alguna ocasión especial o tienes alguna restricción alimentaria?"></textarea>
 
-      <button type="submit" class="button button-light">Enviar Solicitud de Reserva</button>
+      <label class="quote-option">
+        <input type="checkbox" id="cotizacion" name="cotizacion">
+        Quiero solicitar una cotización detallada directamente con el dueño
+      </label>
+
+      <button type="submit" class="button button-light">Enviar solicitud por WhatsApp</button>
     </form>
 
     <figure class="location-map"><img src="imagenes_zapia/imagen_04.jpg" alt="Mapa ilustrado de la ruta Cali a Casa Vieja Mountain Lodge"><figcaption>Ruta Cali — Casa Vieja Mountain Lodge</figcaption></figure>
@@ -701,6 +710,42 @@
     <span>Casa Vieja Mountain Lodge</span>
     <span>Historia · Aves · Bienestar · RNT 169434</span>
   </footer>
+  <script>
+    const bookingForm = document.getElementById('booking-form');
+    const arrivalInput = document.getElementById('llegada');
+    const departureInput = document.getElementById('salida');
+
+    arrivalInput.min = new Date().toISOString().split('T')[0];
+    arrivalInput.addEventListener('change', () => {
+      if (!arrivalInput.value) {
+        departureInput.value = '';
+        return;
+      }
+
+      const departureDate = new Date(`${arrivalInput.value}T12:00:00`);
+      departureDate.setDate(departureDate.getDate() + 1);
+      departureInput.value = departureDate.toISOString().split('T')[0];
+    });
+
+    bookingForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const formData = new FormData(bookingForm);
+      const detailedQuote = formData.get('cotizacion') ? 'Sí' : 'No';
+      const message = [
+        'Hola, quiero cotizar mi Escape a la Montaña en Casa Vieja Mountain Lodge.',
+        `Nombre: ${formData.get('nombre')}`,
+        `Correo: ${formData.get('email')}`,
+        `Teléfono / WhatsApp: ${formData.get('telefono')}`,
+        `Llegada: ${formData.get('llegada')}`,
+        `Salida: ${formData.get('salida')}`,
+        `Huéspedes: ${formData.get('huespedes')}`,
+        `Cotización detallada con el dueño: ${detailedQuote}`,
+        `Comentarios: ${formData.get('mensaje') || 'Ninguno'}`
+      ].join('\n');
+
+      window.open(`https://wa.me/573104190444?text=${encodeURIComponent(message)}`, '_blank', 'noopener');
+    });
+  </script>
 </body>
 </html>
 footer>
