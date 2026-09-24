@@ -186,10 +186,9 @@
     .booking-form .date-note { margin-top: -8px; color: var(--moss); font: 12px Arial, Helvetica, sans-serif; }
     .rate-selector { display: flex; flex-direction: column; gap: 10px; padding: 18px; background: var(--cream); border: 1px solid var(--line); }
     .rate-selector label { margin: 0; }
-    .rate-slider { width: 100% !important; padding: 0 !important; accent-color: var(--forest); cursor: pointer; background: transparent !important; }
+    .rate-select { width: 100% !important; padding: 12px 15px !important; border: 1px solid rgba(125, 4, 29, .3); border-radius: 4px; font: 14px Arial, Helvetica, sans-serif; color: var(--deep); background: var(--white); cursor: pointer; }
     .rate-output { display: flex; justify-content: space-between; gap: 16px; color: var(--deep); font: 14px Arial, Helvetica, sans-serif; }
     .rate-output strong { color: var(--forest); }
-    .rate-scale { display: flex; justify-content: space-between; color: var(--moss); font: 10px Arial, Helvetica, sans-serif; }
     .booking-form button { margin-top: 10px; width: 100%; border: none; cursor: pointer; text-align: center; }
     .contact-links { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 24px auto 30px; }
     .contact-links a { display: inline-block; border: 1px solid rgba(31,75,58,.35); border-radius: 100px; padding: 10px 14px; color: var(--forest); text-decoration: none; font: 700 12px Arial, Helvetica, sans-serif; }
@@ -689,12 +688,20 @@
 
       <div class="rate-selector">
         <label for="tarifa">¿Qué experiencia quieres cotizar?</label>
-        <input class="rate-slider" type="range" id="tarifa" name="tarifa" min="0" max="7" step="1" value="0" aria-describedby="tarifa-seleccionada">
+        <select class="rate-select" id="tarifa" name="tarifa" aria-describedby="tarifa-seleccionada">
+          <option value="0">Habitación sencilla — $130.000 por noche</option>
+          <option value="1">Una noche para una pareja — $200.000 por pareja / noche</option>
+          <option value="2">Dos parejas — $380.000 por noche</option>
+          <option value="3">Grupo completo — $700.000 por noche</option>
+          <option value="4">Pasadía — $80.000 por persona</option>
+          <option value="5">Fotografía de naturaleza — $35.000 por persona</option>
+          <option value="6">Terapias de bienestar — Desde $80.000</option>
+          <option value="7">Servicios de alimentación — Desde $18.000</option>
+        </select>
         <div class="rate-output" id="tarifa-seleccionada" aria-live="polite">
           <strong id="tarifa-nombre">Habitación sencilla</strong>
           <span id="tarifa-precio">$130.000 por noche</span>
         </div>
-        <div class="rate-scale" aria-hidden="true"><span>Alojamiento</span><span>Servicios</span></div>
       </div>
 
       <label for="mensaje">Solicitudes Especiales / Comentarios</label>
@@ -743,7 +750,7 @@
       ratePrice.textContent = price;
     }
 
-    rateSlider.addEventListener('input', updateRateSelection);
+    rateSlider.addEventListener('change', updateRateSelection);
     updateRateSelection();
 
     arrivalInput.min = new Date().toISOString().split('T')[0];
