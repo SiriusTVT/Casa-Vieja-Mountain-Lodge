@@ -195,9 +195,11 @@
     .contact-links a:hover { background: var(--forest); color: var(--white); }
     .phone { display: block; margin-top: 14px; font: 700 14px Arial, Helvetica, sans-serif; color: var(--forest); text-decoration: none; }
     .address { margin: 18px auto 0; color: var(--deep); font: 700 13px Arial, Helvetica, sans-serif; }
-    .location-map { max-width: 520px; margin: 26px auto 0; padding: 10px; background: var(--white); border: 1px solid var(--line); box-shadow: var(--shadow); }
-    .location-map img { display: block; width: 100%; height: auto; }
+    .location-map { max-width: 760px; margin: 26px auto 0; padding: 10px; background: var(--white); border: 1px solid var(--line); box-shadow: var(--shadow); }
+    .location-map iframe { display: block; width: 100%; height: 390px; border: 0; }
     .location-map figcaption { margin-top: 9px; color: var(--forest); font: 700 11px Arial, Helvetica, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+    .location-map .directions-link { display: inline-block; margin-top: 12px; color: var(--forest); font: 700 12px Arial, Helvetica, sans-serif; text-decoration: none; }
+    .location-map .directions-link:hover { color: var(--sand); }
     footer { padding: 26px clamp(20px, 8vw, 110px) 92px; background: var(--deep); color: #dce5d2; font-size: 12px; display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
     @media (max-width: 760px) {
       nav { padding: 13px 20px; flex-wrap: wrap; gap: 10px; }
@@ -710,7 +712,11 @@
       <button type="submit" class="button button-light">Enviar solicitud por WhatsApp</button>
     </form>
 
-    <figure class="location-map"><img src="imagenes_zapia/imagen_04.jpg" alt="Mapa ilustrado de la ruta Cali a Casa Vieja Mountain Lodge"><figcaption>Ruta Cali — Casa Vieja Mountain Lodge</figcaption></figure>
+    <figure class="location-map">
+      <iframe title="Mapa de Casa Vieja Mountain Lodge en La Buitrera, Palmira" src="https://www.google.com/maps?q=Casa+Vieja+Mountain+Lodge,+La+Buitrera,+Palmira,+Valle+del+Cauca&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      <figcaption>Casa Vieja Mountain Lodge · La Buitrera, Palmira</figcaption>
+      <a class="directions-link" href="https://www.google.com/maps/dir/?api=1&origin=Current+Location&destination=Casa+Vieja+Mountain+Lodge%2C+La+Buitrera%2C+Palmira%2C+Valle+del+Cauca" target="_blank" rel="noopener">Abrir ruta desde mi ubicación en Google Maps</a>
+    </figure>
     <p class="address">📍 Km 1 Vía La Ruiza, Buitrera Palmira, Valle del Cauca</p>
     <div class="contact-links">
       <a href="tel:+573104190444">WhatsApp · Contact us · +57 310 419 0444</a>
