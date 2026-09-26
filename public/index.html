@@ -512,21 +512,21 @@
         <h3>Descanso con carácter</h3>
         <p>Habitaciones muy amplias, frescas y térmicas dentro de una casa de madera con más de un siglo de historia.</p>
         <span class="tag">Con cocina para huéspedes</span>
-        <a class="button reserve-button" href="https://wa.me/573104190444?text=Hola%2C%20quiero%20reservar%20hospedaje%20en%20Casa%20Vieja%20Mountain%20Lodge." target="_blank" rel="noopener">Reservar hospedaje</a>
+        <a class="button reserve-button" href="#contacto" data-rate="0">Reservar hospedaje</a>
       </article>
       <article class="card">
         <div class="number">02 / AVISTAMIENTO</div>
         <h3>El bosque como escenario</h3>
         <p>Explora el Parque de las Aves y su sendero entre bosque nativo tropical. Hay 141 especies clasificadas para descubrir.</p>
         <span class="tag">Con sendero al río Vilela</span>
-        <a class="button reserve-button" href="https://wa.me/573104190444?text=Hola%2C%20quiero%20reservar%20una%20experiencia%20de%20avistamiento%20de%20aves%20en%20Casa%20Vieja%20Mountain%20Lodge." target="_blank" rel="noopener">Reservar avistamiento</a>
+        <a class="button reserve-button" href="#contacto" data-rate="5">Reservar avistamiento</a>
       </article>
       <article class="card">
         <div class="number">03 / BIENESTAR</div>
         <h3>Una pausa para ti</h3>
         <p>Vive terapias de bienestar pensadas para desconectarte del ruido, de los celulares y volver a conectar con la naturaleza.</p>
         <span class="tag">Tiempo presente</span>
-        <a class="button reserve-button" href="https://wa.me/573104190444?text=Hola%2C%20quiero%20reservar%20una%20terapia%20de%20bienestar%20en%20Casa%20Vieja%20Mountain%20Lodge." target="_blank" rel="noopener">Reservar terapia</a>
+        <a class="button reserve-button" href="#contacto" data-rate="6">Reservar terapia</a>
       </article>
     </div>
   </section>
@@ -792,6 +792,13 @@
       rateName.textContent = name;
       ratePrice.textContent = price;
     }
+
+    document.querySelectorAll('.reserve-button').forEach((reserveButton) => {
+      reserveButton.addEventListener('click', () => {
+        rateSlider.value = reserveButton.dataset.rate;
+        updateRateSelection();
+      });
+    });
 
     rateSlider.addEventListener('change', updateRateSelection);
     updateRateSelection();
