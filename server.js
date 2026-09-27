@@ -1,6 +1,8 @@
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
+const crypto = require('node:crypto');
+const { promisify } = require('node:util');
 const { MongoClient } = require('mongodb');
 
 const PORT = Number(process.env.PORT) || 3000;
@@ -9,6 +11,8 @@ const PUBLIC_ROOT = path.join(__dirname, 'public');
 const MONGODB_URI = process.env.MONGODB_URI;
 const mongoClient = MONGODB_URI ? new MongoClient(MONGODB_URI) : null;
 let databasePromise;
+const sessions = new Map();
+const scryptAsync = promisify(crypto.scrypt);
 
 const MIME_TYPES = {
   '.css': 'text/css; charset=utf-8', '.gif': 'image/gif', '.html': 'text/html; charset=utf-8',
@@ -22,8 +26,9 @@ function send(response, statusCode, contentType, body) {
   response.end(body);
 }
 
-function sendJson(response, statusCode, body) {
-  send(response, statusCode, 'application/json; charset=utf-8', JSON.stringify(body));
+function sendJson(response, statusCode, body, headers = {}) {
+  response.writeHead(statusCode, { 'Content-Type': 'application/json; charset=utf-8', ...headers });
+  response.end(JSON.stringify(body));
 }
 
 function readJson(request) {
@@ -58,6 +63,87 @@ async function getDatabase() {
   return databasePromise;
 }
 
+async function getAdminCollection() {
+  const database = await getDatabase();
+  const collection = database.collection('administradores');
+  await collection.createIndex({ username: 1 }, { unique: true });
+  return collection;
+}
+
+async function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) {
+  const derivedKey = await scryptAsync(password, salt, 64);
+  return `${salt}:${derivedKey.toString('hex')}`;
+}
+
+async function verifyPassword(password, storedHash) {
+  const [salt, key] = storedHash.split(':');
+  const derivedKey = await scryptAsync(password, salt, 64);
+  const expectedKey = Buffer.from(key, 'hex');
+  return expectedKey.length === derivedKey.length && crypto.timingSafeEqual(expectedKey, derivedKey);
+}
+
+function cookies(request) {
+  return Object.fromEntries((request.headers.cookie || '').split(';').filter(Boolean).map((part) => {
+    const index = part.indexOf('=');
+    return [part.slice(0, index).trim(), decodeURIComponent(part.slice(index + 1).trim())];
+  }));
+}
+
+function sessionAdmin(request) {
+  const token = cookies(request).admin_session;
+  const session = token ? sessions.get(token) : null;
+  if (!session || session.expiresAt < Date.now()) { if (token) sessions.delete(token); return null; }
+  return session;
+}
+
+function sessionCookie(token) {
+  return `admin_session=${encodeURIComponent(token)}; HttpOnly; SameSite=Lax; Path=/; Max-Age=28800${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`;
+}
+
+async function handleAdminStatus(response) {
+  try {
+    const count = await (await getAdminCollection()).countDocuments({});
+    return sendJson(response, 200, { ok: true, setupRequired: count === 0 });
+  } catch (error) { return sendJson(response, 503, { ok: false, error: 'MongoDB no está disponible.' }); }
+}
+
+async function handleAdminRegister(request, response) {
+  try {
+    const data = await readJson(request);
+    const username = String(data.username || '').trim().toLowerCase();
+    const password = String(data.password || '');
+    if (!/^[a-z0-9._-]{3,32}$/.test(username) || password.length < 10) return sendJson(response, 400, { ok: false, error: 'Usa un usuario válido y una contraseña de mínimo 10 caracteres.' });
+    const collection = await getAdminCollection();
+    if (await collection.countDocuments({})) return sendJson(response, 409, { ok: false, error: 'Ya existe un administrador. Inicia sesión.' });
+    await collection.insertOne({ username, passwordHash: await hashPassword(password), createdAt: new Date() });
+    return sendJson(response, 201, { ok: true });
+  } catch (error) { console.error('Error registrando administrador:', error.message); return sendJson(response, 503, { ok: false, error: 'No se pudo crear el administrador.' }); }
+}
+
+async function handleAdminLogin(request, response) {
+  try {
+    const data = await readJson(request);
+    const username = String(data.username || '').trim().toLowerCase();
+    const admin = await (await getAdminCollection()).findOne({ username });
+    if (!admin || !(await verifyPassword(String(data.password || ''), admin.passwordHash))) return sendJson(response, 401, { ok: false, error: 'Usuario o contraseña incorrectos.' });
+    const token = crypto.randomBytes(32).toString('hex');
+    sessions.set(token, { adminId: String(admin._id), username: admin.username, expiresAt: Date.now() + 8 * 60 * 60 * 1000 });
+    return sendJson(response, 200, { ok: true, username: admin.username }, { 'Set-Cookie': sessionCookie(token) });
+  } catch (error) { return sendJson(response, 503, { ok: false, error: 'No se pudo iniciar sesión.' }); }
+}
+
+function requireAdmin(request, response) {
+  const session = sessionAdmin(request);
+  if (!session) { sendJson(response, 401, { ok: false, error: 'Sesión no válida.' }); return null; }
+  return session;
+}
+
+async function handleAdminQuotes(request, response) {
+  if (!requireAdmin(request, response)) return;
+  try { const database = await getDatabase(); const quotes = await database.collection('cotizaciones').find({}).sort({ createdAt: -1 }).limit(200).project({ _id: 0 }).toArray(); return sendJson(response, 200, { ok: true, quotes }); }
+  catch { return sendJson(response, 503, { ok: false, error: 'No se pudieron cargar las cotizaciones.' }); }
+}
+
 async function saveQuote(data) {
   const database = await getDatabase();
   const collection = database.collection('cotizaciones');
@@ -86,6 +172,12 @@ async function handleQuote(request, response) {
 const server = http.createServer((request, response) => {
   const requestPath = decodeURIComponent(request.url.split('?')[0]);
   if (requestPath === '/api/cotizaciones' && request.method === 'POST') return void handleQuote(request, response);
+  if (requestPath === '/api/admin/status' && request.method === 'GET') return void handleAdminStatus(response);
+  if (requestPath === '/api/admin/register' && request.method === 'POST') return void handleAdminRegister(request, response);
+  if (requestPath === '/api/admin/login' && request.method === 'POST') return void handleAdminLogin(request, response);
+  if (requestPath === '/api/admin/logout' && request.method === 'POST') { sessions.delete(cookies(request).admin_session); return sendJson(response, 200, { ok: true }, { 'Set-Cookie': 'admin_session=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0' }); }
+  if (requestPath === '/api/admin/me' && request.method === 'GET') { const session = requireAdmin(request, response); return session ? sendJson(response, 200, { ok: true, username: session.username }) : undefined; }
+  if (requestPath === '/api/admin/cotizaciones' && request.method === 'GET') return void handleAdminQuotes(request, response);
   if (requestPath.startsWith('/api/')) return sendJson(response, 404, { ok: false, error: 'Ruta API no encontrada' });
 
   const relativePath = requestPath === '/' ? 'index.html' : requestPath.slice(1);

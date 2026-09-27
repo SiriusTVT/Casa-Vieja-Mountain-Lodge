@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel de administración | Casa Vieja</title>
+  <link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+  <main class="admin-shell">
+    <div class="admin-brand">Casa Vieja <span>Panel privado</span></div>
+    <section class="admin-card" id="auth-card">
+      <p class="eyebrow">Acceso restringido</p>
+      <h1 id="auth-title">Iniciar sesión</h1>
+      <p id="auth-description">Administra las solicitudes de cotización del lodge.</p>
+      <form id="auth-form">
+        <label for="username">Usuario</label><input id="username" name="username" required autocomplete="username">
+        <label for="password">Contraseña</label><input id="password" name="password" type="password" required autocomplete="current-password">
+        <button type="submit" id="auth-submit">Iniciar sesión</button>
+      </form>
+      <button class="text-button" type="button" id="toggle-setup">Primer registro de administrador</button>
+      <p class="status" id="auth-status" role="status"></p>
+    </section>
+    <section class="dashboard" id="dashboard" hidden>
+      <header class="dashboard-header"><div><p class="eyebrow">Panel privado</p><h1>Cotizaciones</h1></div><button id="logout">Cerrar sesión</button></header>
+      <div class="dashboard-meta" id="dashboard-meta"></div>
+      <div class="quotes" id="quotes"></div>
+    </section>
+  </main>
+  <script src="/admin.js"></script>
+</body>
+</html>

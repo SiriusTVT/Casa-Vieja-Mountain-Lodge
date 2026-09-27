@@ -58,6 +58,15 @@ const manualReviews = [
   ['Leidy Hurtado', 5, 'Calificación de 5 estrellas en Google.']
 ];
 
+const footer = document.querySelector('.footer');
+if (footer && !footer.querySelector('.admin-link')) {
+  const adminLink = document.createElement('a');
+  adminLink.className = 'admin-link';
+  adminLink.href = '/admin.html';
+  adminLink.textContent = 'Panel administrador';
+  footer.append(adminLink);
+}
+
 const testimonials = document.querySelector('#testimonios');
 const main = document.querySelector('main');
 if (testimonials && main) main.append(testimonials);

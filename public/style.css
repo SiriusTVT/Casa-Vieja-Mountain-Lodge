@@ -172,6 +172,7 @@ figcaption { margin-top: 10px; color: var(--earth); font: 10px var(--sans); lett
 .footer { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding: 30px clamp(20px, 8vw, 130px); background: var(--deep); color: rgba(255,255,255,.7); font: 11px var(--sans); letter-spacing: .08em; text-transform: uppercase; }
 .footer div { display: flex; gap: 18px; }
 .footer a { color: var(--gold); text-decoration: none; }
+.footer .admin-link { margin-left: auto; opacity: .55; font-size: 9px; }
 .reveal { opacity: 0; transform: translateY(24px); transition: opacity .8s ease, transform .8s cubic-bezier(.2,.8,.2,1); }
 .reveal.is-visible { opacity: 1; transform: none; }
 .reveal-delay { transition-delay: .12s; }
