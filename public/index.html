@@ -46,6 +46,14 @@
   </main>
   <a class="whatsapp-float" href="https://wa.me/573104190444" target="_blank" rel="noopener" aria-label="Contactar por WhatsApp">WA</a><footer class="footer"><span>Casa Vieja Mountain Lodge</span><span>Historia · Aves · Bienestar · RNT 169434</span><div><a href="https://www.instagram.com/casaviejamountainlodge/" target="_blank" rel="noopener">Instagram</a><a href="https://www.facebook.com/share/1FsY9ZUbM3/?mibextid=wwXIfr" target="_blank" rel="noopener">Facebook</a><a href="https://www.tiktok.com/@casa.vieja.mounta/video/7622376167043091732" target="_blank" rel="noopener">TikTok</a></div></footer>
   <script>
+    const contactSection = document.querySelector('.contact-section');
+    const contactIntro = document.querySelector('.contact-intro');
+    const bookingFormElement = document.querySelector('.booking-form');
+    const contactTop = document.createElement('div');
+    contactTop.className = 'contact-top';
+    contactSection.insertBefore(contactTop, contactIntro);
+    contactTop.append(contactIntro, bookingFormElement);
+
     const nav = document.querySelector('.nav'); const menuToggle = document.querySelector('.menu-toggle'); const navMenu = document.querySelector('.nav-menu'); const revealItems = document.querySelectorAll('.reveal');
     const rateOptions = [['Habitación sencilla', '$130.000 por noche'], ['Una noche para una pareja', '$200.000 por pareja / noche'], ['Dos parejas', '$380.000 por noche'], ['Grupo completo', '$700.000 por noche'], ['Pasadía', '$80.000 por persona'], ['Fotografía de naturaleza', '$35.000 por persona'], ['Terapias de bienestar', 'Desde $80.000'], ['Servicios de alimentación', 'Desde $18.000']]; const rateSelect = document.getElementById('tarifa'); const rateName = document.getElementById('tarifa-nombre'); const ratePrice = document.getElementById('tarifa-precio');
     const revealObserver = new IntersectionObserver((entries, observer) => { entries.forEach((entry) => { if (!entry.isIntersecting) return; entry.target.classList.add('is-visible'); observer.unobserve(entry.target); }); }, { threshold: 0.1 }); revealItems.forEach((item) => revealObserver.observe(item));
