@@ -9,3 +9,15 @@ services:
     envVars:
       - key: MONGODB_URI
         sync: false
+      - key: PAYMENT_BANK_NAME
+        sync: false
+      - key: PAYMENT_ACCOUNT_TYPE
+        sync: false
+      - key: PAYMENT_ACCOUNT_NUMBER
+        sync: false
+      - key: PAYMENT_ACCOUNT_HOLDER
+        sync: false
+      - key: PAYMENT_BREB_KEY
+        sync: false
+      - key: PAYMENT_QR_IMAGE_URL
+        sync: false
