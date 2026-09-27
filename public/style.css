@@ -139,7 +139,7 @@ figcaption { margin-top: 10px; color: var(--earth); font: 10px var(--sans); lett
 .final-cta-bg { position: absolute; inset: 0; background: linear-gradient(rgba(23,35,28,.45), rgba(23,35,28,.8)), url('/Casa-Lodge-Img/imagen_14.jpg') center/cover; }
 .final-cta-content { position: relative; z-index: 1; max-width: 900px; padding: 40px 20px; }
 .final-cta h2 { color: var(--white); font-size: clamp(42px, 6vw, 92px); }
-.contact-section { display: grid; grid-template-columns: .8fr 1.2fr; gap: clamp(35px, 8vw, 110px); align-items: start; background: #fffaf2; }
+.contact-section { display: grid; grid-template-columns: .8fr 1.2fr; grid-template-rows: auto auto; column-gap: clamp(35px, 8vw, 110px); row-gap: clamp(55px, 8vw, 100px); align-items: start; background: #fffaf2; }
 .contact-intro { position: sticky; top: 120px; }
 .contact-intro p:not(.eyebrow) { color: var(--earth); font-size: 18px; }
 .booking-form { display: flex; flex-direction: column; gap: 11px; max-width: 660px; padding: clamp(25px, 4vw, 45px); background: var(--white); border: 1px solid var(--line); }
@@ -151,7 +151,7 @@ figcaption { margin-top: 10px; color: var(--earth); font: 10px var(--sans); lett
 .rate-output { display: flex; justify-content: space-between; gap: 20px; padding: 15px; background: var(--forest); color: var(--white); font: 13px var(--sans); }
 .rate-output strong { color: var(--gold); }
 .booking-form button { margin-top: 16px; cursor: pointer; }
-.location-block { grid-column: 1 / -1; max-width: 840px; width: 100%; justify-self: center; margin-top: 22px; }
+.location-block { grid-column: 1 / -1; grid-row: 2; max-width: 840px; width: 100%; justify-self: center; align-self: start; margin: 0; position: relative; clear: both; }
 .location-block iframe { display: block; width: 100%; height: 330px; border: 0; filter: saturate(.7) contrast(.95); }
 .location-block p { margin: 16px 0 4px; color: var(--forest); font: 700 12px var(--sans); }
 .location-block a { color: var(--earth); font: 700 11px var(--sans); text-decoration: none; }
