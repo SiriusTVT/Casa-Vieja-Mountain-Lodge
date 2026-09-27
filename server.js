@@ -12,6 +12,7 @@ const MONGODB_URI = process.env.MONGODB_URI;
 const mongoClient = MONGODB_URI ? new MongoClient(MONGODB_URI) : null;
 let databasePromise;
 let lastCleanupAt = 0;
+let indexesPromise;
 const sessions = new Map();
 const scryptAsync = promisify(crypto.scrypt);
 
@@ -62,8 +63,20 @@ async function getDatabase() {
     databasePromise = mongoClient.connect().then((client) => client.db('casa_vieja'));
   }
   const database = await databasePromise;
+  await ensureDatabaseIndexes(database);
   if (Date.now() - lastCleanupAt > 60 * 60 * 1000) { lastCleanupAt = Date.now(); await cleanupCancelledQuotes(database); }
   return database;
+}
+
+async function ensureDatabaseIndexes(database) {
+  if (!indexesPromise) {
+    const quotes = database.collection('cotizaciones');
+    indexesPromise = Promise.all([
+      quotes.createIndex({ createdAt: -1 }),
+      quotes.createIndex({ canceladoAt: 1 }, { expireAfterSeconds: 7 * 24 * 60 * 60, partialFilterExpression: { estado: 'cancelado' } })
+    ]);
+  }
+  return indexesPromise;
 }
 
 async function cleanupCancelledQuotes(database) {
