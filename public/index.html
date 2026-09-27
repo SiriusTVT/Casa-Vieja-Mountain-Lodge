@@ -69,5 +69,6 @@
     updateRate();
     document.getElementById('booking-form').addEventListener('submit', (event) => { event.preventDefault(); const data = new FormData(event.currentTarget); const [selectedRate, selectedPrice] = getRate(); const message = ['Hola, quiero cotizar mi Escape a la Montaña en Casa Vieja Mountain Lodge.', `Nombre: ${data.get('nombre')}`, `Correo: ${data.get('email')}`, `Teléfono / WhatsApp: ${data.get('telefono')}`, `Llegada: ${data.get('llegada')}`, `Salida: ${data.get('salida') || 'No aplica: servicio durante el día'}`, `Huéspedes: ${data.get('huespedes')}`, `Experiencia: ${selectedRate}`, `Cotización: ${selectedPrice}`, `Comentarios: ${data.get('mensaje') || 'Ninguno'}`].join('\n'); window.open(`https://wa.me/573104190444?text=${encodeURIComponent(message)}`, '_blank', 'noopener'); });
   </script>
+  <script src="/reviews.js"></script>
 </body>
 </html>
