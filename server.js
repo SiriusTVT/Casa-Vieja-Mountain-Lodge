@@ -11,6 +11,7 @@ const PUBLIC_ROOT = path.join(__dirname, 'public');
 const MONGODB_URI = process.env.MONGODB_URI;
 const mongoClient = MONGODB_URI ? new MongoClient(MONGODB_URI) : null;
 let databasePromise;
+let lastCleanupAt = 0;
 const sessions = new Map();
 const scryptAsync = promisify(crypto.scrypt);
 
@@ -60,7 +61,14 @@ async function getDatabase() {
   if (!databasePromise) {
     databasePromise = mongoClient.connect().then((client) => client.db('casa_vieja'));
   }
-  return databasePromise;
+  const database = await databasePromise;
+  if (Date.now() - lastCleanupAt > 60 * 60 * 1000) { lastCleanupAt = Date.now(); await cleanupCancelledQuotes(database); }
+  return database;
+}
+
+async function cleanupCancelledQuotes(database) {
+  const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  await database.collection('cotizaciones').deleteMany({ estado: 'cancelado', canceladoAt: { $lt: cutoff } });
 }
 
 async function getAdminCollection() {
@@ -153,7 +161,7 @@ async function handlePaymentLink(request, response, quoteId) {
     const quote = await collection.findOne({ _id: new ObjectId(quoteId) });
     if (!quote) return sendJson(response, 404, { ok: false, error: 'Cotización no encontrada.' });
     const token = crypto.randomBytes(32).toString('hex');
-    const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     await collection.updateOne({ _id: quote._id }, { $set: { payment: { token, status: 'pending', createdAt: new Date(), expiresAt } } });
     const protocol = process.env.NODE_ENV === 'production' ? 'https' : (request.headers['x-forwarded-proto'] || 'http');
     const link = `${protocol}://${request.headers.host}/pago.html?token=${token}`;
@@ -169,7 +177,8 @@ async function handlePublicPayment(request, response, token) {
   try {
     const database = await getDatabase();
     const quote = await database.collection('cotizaciones').findOne({ 'payment.token': token });
-    if (!quote || !quote.payment || quote.payment.expiresAt < new Date() || quote.payment.status === 'cancelled') return sendJson(response, 404, { ok: false, error: 'Este link de pago no está disponible.' });
+    if (quote && quote.payment && quote.payment.expiresAt < new Date() && quote.payment.status === 'pending') await database.collection('cotizaciones').updateOne({ _id: quote._id }, { $set: { 'payment.status': 'cancelled', estado: 'cancelado', canceladoAt: new Date() } });
+    if (!quote || !quote.payment || quote.payment.expiresAt < new Date() || quote.payment.status === 'cancelled') return sendJson(response, 404, { ok: false, error: 'Este link de pago no está disponible porque venció o fue cancelado.' });
     return sendJson(response, 200, { ok: true, payment: { name: quote.nombre, amount: quote.cotizacion, experience: quote.experienciaNombre, expiresAt: quote.payment.expiresAt, settings: paymentSettings() } });
   } catch { return sendJson(response, 503, { ok: false, error: 'No se pudo cargar el pago.' }); }
 }
@@ -181,6 +190,25 @@ async function handlePaymentConfirmation(request, response, token) {
     if (!result.matchedCount) return sendJson(response, 404, { ok: false, error: 'Este link de pago no está disponible.' });
     return sendJson(response, 200, { ok: true });
   } catch { return sendJson(response, 503, { ok: false, error: 'No se pudo registrar el aviso de pago.' }); }
+}
+
+async function updateQuoteStatus(request, response, quoteId, status) {
+  if (!requireAdmin(request, response)) return;
+  if (!ObjectId.isValid(quoteId)) return sendJson(response, 400, { ok: false, error: 'Cotización no válida.' });
+  try {
+    const database = await getDatabase();
+    const payment = status === 'confirmado' ? { status: 'confirmed', confirmedAt: new Date() } : { status: 'cancelled', cancelledAt: new Date() };
+    const fields = status === 'confirmado' ? { estado: 'confirmado', 'payment.status': payment.status, 'payment.confirmedAt': payment.confirmedAt } : { estado: 'cancelado', 'payment.status': payment.status, 'payment.cancelledAt': payment.cancelledAt, canceladoAt: new Date() };
+    const result = await database.collection('cotizaciones').updateOne({ _id: new ObjectId(quoteId) }, { $set: fields });
+    return result.matchedCount ? sendJson(response, 200, { ok: true, status }) : sendJson(response, 404, { ok: false, error: 'Cotización no encontrada.' });
+  } catch { return sendJson(response, 503, { ok: false, error: 'No se pudo actualizar la cotización.' }); }
+}
+
+async function deleteQuote(request, response, quoteId) {
+  if (!requireAdmin(request, response)) return;
+  if (!ObjectId.isValid(quoteId)) return sendJson(response, 400, { ok: false, error: 'Cotización no válida.' });
+  try { const result = await (await getDatabase()).collection('cotizaciones').deleteOne({ _id: new ObjectId(quoteId) }); return result.deletedCount ? sendJson(response, 200, { ok: true }) : sendJson(response, 404, { ok: false, error: 'Cotización no encontrada.' }); }
+  catch { return sendJson(response, 503, { ok: false, error: 'No se pudo eliminar la cotización.' }); }
 }
 
 async function saveQuote(data) {
@@ -219,6 +247,10 @@ const server = http.createServer((request, response) => {
   if (requestPath === '/api/admin/cotizaciones' && request.method === 'GET') return void handleAdminQuotes(request, response);
   const paymentLinkMatch = requestPath.match(/^\/api\/admin\/cotizaciones\/([^/]+)\/payment-link$/);
   if (paymentLinkMatch && request.method === 'POST') return void handlePaymentLink(request, response, paymentLinkMatch[1]);
+  const quoteStatusMatch = requestPath.match(/^\/api\/admin\/cotizaciones\/([^/]+)\/(confirmar|cancelar)$/);
+  if (quoteStatusMatch && request.method === 'POST') return void updateQuoteStatus(request, response, quoteStatusMatch[1], quoteStatusMatch[2] === 'confirmar' ? 'confirmado' : 'cancelado');
+  const quoteDeleteMatch = requestPath.match(/^\/api\/admin\/cotizaciones\/([^/]+)$/);
+  if (quoteDeleteMatch && request.method === 'DELETE') return void deleteQuote(request, response, quoteDeleteMatch[1]);
   const publicPaymentMatch = requestPath.match(/^\/api\/pagos\/([^/]+)$/);
   if (publicPaymentMatch && request.method === 'GET') return void handlePublicPayment(request, response, publicPaymentMatch[1]);
   if (publicPaymentMatch && request.method === 'POST') return void handlePaymentConfirmation(request, response, publicPaymentMatch[1]);

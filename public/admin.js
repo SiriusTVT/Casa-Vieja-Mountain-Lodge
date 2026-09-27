@@ -33,7 +33,7 @@ function renderQuotes(quotes) {
   quotes.forEach((quote) => {
     const article = document.createElement('article');
     article.className = 'quote';
-    article.innerHTML = `<h2></h2><p><strong>Experiencia:</strong> ${quote.experienciaNombre || quote.experiencia}</p><p><strong>Fechas:</strong> ${quote.llegada} a ${quote.salida || 'No aplica'}</p><p><strong>Huéspedes:</strong> ${quote.huespedes}</p><p><strong>Cotización:</strong> ${quote.cotizacion}</p><p><strong>Contacto:</strong> ${quote.email} · ${quote.telefono}</p><p>${quote.comentarios || ''}</p><small>Estado: ${quote.estado} · Pago: ${quote.payment?.status || 'sin link'} · ${new Date(quote.createdAt).toLocaleString('es-CO')}</small><div class="payment-actions"><button type="button" class="payment-link-button" data-quote-id="${quote.id}">Generar link de pago</button><span class="payment-link-result" role="status"></span></div>`;
+    article.innerHTML = `<h2></h2><p><strong>Experiencia:</strong> ${quote.experienciaNombre || quote.experiencia}</p><p><strong>Fechas:</strong> ${quote.llegada} a ${quote.salida || 'No aplica'}</p><p><strong>Huéspedes:</strong> ${quote.huespedes}</p><p><strong>Cotización:</strong> ${quote.cotizacion}</p><p><strong>Contacto:</strong> ${quote.email} · ${quote.telefono}</p><p>${quote.comentarios || ''}</p><small>Estado: ${quote.estado} · Pago: ${quote.payment?.status || 'sin link'} · ${new Date(quote.createdAt).toLocaleString('es-CO')}</small><div class="payment-actions"><button type="button" class="payment-link-button" data-quote-id="${quote.id}">Generar link de pago</button><button type="button" class="quote-confirm" data-quote-id="${quote.id}">Confirmar pago</button><button type="button" class="quote-cancel" data-quote-id="${quote.id}">Cancelar</button><button type="button" class="quote-delete" data-quote-id="${quote.id}">Eliminar</button><span class="payment-link-result" role="status"></span></div>`;
     article.querySelector('h2').textContent = quote.nombre;
     quotesElement.append(article);
   });
@@ -47,6 +47,13 @@ function renderQuotes(quotes) {
     button.disabled = true; button.textContent = 'Generando...';
     try { const data = await request(`/api/admin/cotizaciones/${button.dataset.quoteId}/payment-link`, { method: 'POST' }); await navigator.clipboard.writeText(data.link); result.textContent = 'Link copiado'; result.title = data.link; button.textContent = 'Generar nuevo link'; }
     catch (error) { result.textContent = error.message; button.textContent = 'Reintentar'; button.disabled = false; }
+  }));
+  quotesElement.querySelectorAll('.quote-confirm, .quote-cancel, .quote-delete').forEach((button) => button.addEventListener('click', async () => {
+    const action = button.classList.contains('quote-delete') ? 'delete' : button.classList.contains('quote-confirm') ? 'confirmar' : 'cancelar';
+    if (!window.confirm(action === 'delete' ? '¿Eliminar definitivamente esta cotización?' : `¿${action === 'confirmar' ? 'Confirmar el pago' : 'Cancelar la cotización'}?`)) return;
+    const endpoint = action === 'delete' ? `/api/admin/cotizaciones/${button.dataset.quoteId}` : `/api/admin/cotizaciones/${button.dataset.quoteId}/${action}`;
+    button.disabled = true;
+    try { await request(endpoint, { method: action === 'delete' ? 'DELETE' : 'POST' }); const refreshed = await request('/api/admin/cotizaciones'); renderQuotes(refreshed.quotes); } catch (error) { window.alert(error.message); button.disabled = false; }
   }));
 }
 
