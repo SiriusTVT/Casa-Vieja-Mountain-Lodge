@@ -9,3 +9,12 @@ services:
     envVars:
       - key: MONGODB_URI
         sync: false
+  - type: cron
+    name: casa-vieja-mongodb-heartbeat
+    runtime: node
+    buildCommand: npm install
+    startCommand: node keepalive.js
+    schedule: "0 7 * * *"
+    envVars:
+      - key: MONGODB_URI
+        sync: false
