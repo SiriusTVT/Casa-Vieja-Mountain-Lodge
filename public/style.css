@@ -147,6 +147,7 @@ figcaption { margin-top: 10px; color: var(--earth); font: 10px var(--sans); lett
 .booking-form label { margin-top: 9px; color: var(--forest); font: 700 10px var(--sans); letter-spacing: .14em; text-transform: uppercase; }
 .booking-form input, .booking-form textarea, .booking-form select { width: 100%; padding: 13px 14px; border: 1px solid rgba(38,53,43,.25); border-radius: 0; color: var(--ink); background: var(--cream); font: 14px var(--sans); }
 .booking-form input:focus, .booking-form textarea:focus, .booking-form select:focus { outline: 2px solid var(--gold); outline-offset: 2px; }
+.booking-form input:disabled { cursor: not-allowed; opacity: .55; background: #e8e1d5; }
 .date-group { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .form-note { margin: 0; color: var(--earth); font: 11px var(--sans); }
 .rate-output { display: flex; justify-content: space-between; gap: 20px; padding: 15px; background: var(--forest); color: var(--white); font: 13px var(--sans); }
