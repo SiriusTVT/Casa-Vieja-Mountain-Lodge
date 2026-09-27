@@ -177,7 +177,7 @@ async function handlePublicPayment(request, response, token) {
 async function handlePaymentConfirmation(request, response, token) {
   try {
     const database = await getDatabase();
-    const result = await database.collection('cotizaciones').updateOne({ 'payment.token': token, 'payment.status': 'pending' }, { $set: { 'payment.status': 'reported', 'payment.reportedAt': new Date() } });
+    const result = await database.collection('cotizaciones').updateOne({ 'payment.token': token, 'payment.status': { $in: ['pending', 'reported'] } }, { $set: { 'payment.status': 'reported', 'payment.reportedAt': new Date(), estado: 'pago_reportado' } });
     if (!result.matchedCount) return sendJson(response, 404, { ok: false, error: 'Este link de pago no está disponible.' });
     return sendJson(response, 200, { ok: true });
   } catch { return sendJson(response, 503, { ok: false, error: 'No se pudo registrar el aviso de pago.' }); }

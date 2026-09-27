@@ -33,12 +33,17 @@ function renderQuotes(quotes) {
   quotes.forEach((quote) => {
     const article = document.createElement('article');
     article.className = 'quote';
-    article.innerHTML = `<h2></h2><p><strong>Experiencia:</strong> ${quote.experienciaNombre || quote.experiencia}</p><p><strong>Fechas:</strong> ${quote.llegada} a ${quote.salida || 'No aplica'}</p><p><strong>Huéspedes:</strong> ${quote.huespedes}</p><p><strong>Cotización:</strong> ${quote.cotizacion}</p><p><strong>Contacto:</strong> ${quote.email} · ${quote.telefono}</p><p>${quote.comentarios || ''}</p><small>Estado: ${quote.estado} · ${new Date(quote.createdAt).toLocaleString('es-CO')}</small><div class="payment-actions"><button type="button" class="payment-link-button" data-quote-id="${quote.id}">Generar link de pago</button><span class="payment-link-result" role="status"></span></div>`;
+    article.innerHTML = `<h2></h2><p><strong>Experiencia:</strong> ${quote.experienciaNombre || quote.experiencia}</p><p><strong>Fechas:</strong> ${quote.llegada} a ${quote.salida || 'No aplica'}</p><p><strong>Huéspedes:</strong> ${quote.huespedes}</p><p><strong>Cotización:</strong> ${quote.cotizacion}</p><p><strong>Contacto:</strong> ${quote.email} · ${quote.telefono}</p><p>${quote.comentarios || ''}</p><small>Estado: ${quote.estado} · Pago: ${quote.payment?.status || 'sin link'} · ${new Date(quote.createdAt).toLocaleString('es-CO')}</small><div class="payment-actions"><button type="button" class="payment-link-button" data-quote-id="${quote.id}">Generar link de pago</button><span class="payment-link-result" role="status"></span></div>`;
     article.querySelector('h2').textContent = quote.nombre;
     quotesElement.append(article);
   });
   quotesElement.querySelectorAll('.payment-link-button').forEach((button) => button.addEventListener('click', async () => {
     const result = button.parentElement.querySelector('.payment-link-result');
+    const data = await request('/api/admin/cotizaciones');
+    authCard.hidden = true;
+    dashboard.hidden = false;
+    renderQuotes(data.quotes);
+    dashboard.querySelector('.eyebrow').textContent = `Sesión: ${username}`;
     button.disabled = true; button.textContent = 'Generando...';
     try { const data = await request(`/api/admin/cotizaciones/${button.dataset.quoteId}/payment-link`, { method: 'POST' }); await navigator.clipboard.writeText(data.link); result.textContent = 'Link copiado'; result.title = data.link; button.textContent = 'Generar nuevo link'; }
     catch (error) { result.textContent = error.message; button.textContent = 'Reintentar'; button.disabled = false; }
@@ -47,6 +52,11 @@ function renderQuotes(quotes) {
 
 async function loadDashboard(username) {
   const data = await request('/api/admin/cotizaciones');
+document.getElementById('refresh-quotes').addEventListener('click', async () => {
+  const button = document.getElementById('refresh-quotes');
+  button.disabled = true;
+  try { const data = await request('/api/admin/cotizaciones'); renderQuotes(data.quotes); } finally { button.disabled = false; }
+});
   authCard.hidden = true;
   dashboard.hidden = false;
   renderQuotes(data.quotes);
