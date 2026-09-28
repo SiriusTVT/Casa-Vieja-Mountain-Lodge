@@ -212,7 +212,8 @@ async function updateQuoteStatus(request, response, quoteId, status) {
     const database = await getDatabase();
     const payment = status === 'confirmado' ? { status: 'confirmed', confirmedAt: new Date() } : { status: 'cancelled', cancelledAt: new Date() };
     const fields = status === 'confirmado' ? { estado: 'confirmado', 'payment.status': payment.status, 'payment.confirmedAt': payment.confirmedAt } : { estado: 'cancelado', 'payment.status': payment.status, 'payment.cancelledAt': payment.cancelledAt, canceladoAt: new Date() };
-    const result = await database.collection('cotizaciones').updateOne({ _id: new ObjectId(quoteId) }, { $set: fields });
+    const update = status === 'confirmado' ? { $set: fields, $unset: { 'payment.token': '' } } : { $set: fields };
+    const result = await database.collection('cotizaciones').updateOne({ _id: new ObjectId(quoteId) }, update);
     return result.matchedCount ? sendJson(response, 200, { ok: true, status }) : sendJson(response, 404, { ok: false, error: 'Cotización no encontrada.' });
   } catch { return sendJson(response, 503, { ok: false, error: 'No se pudo actualizar la cotización.' }); }
 }
