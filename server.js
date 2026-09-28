@@ -251,6 +251,7 @@ async function handleQuote(request, response) {
 
 const server = http.createServer((request, response) => {
   const requestPath = decodeURIComponent(request.url.split('?')[0]);
+  if (requestPath === '/admin.html') return send(response, 404, 'text/plain; charset=utf-8', 'Página no encontrada');
   if (requestPath === '/api/cotizaciones' && request.method === 'POST') return void handleQuote(request, response);
   if (requestPath === '/api/admin/status' && request.method === 'GET') return void handleAdminStatus(response);
   if (requestPath === '/api/admin/register' && request.method === 'POST') return void handleAdminRegister(request, response);
@@ -269,7 +270,7 @@ const server = http.createServer((request, response) => {
   if (publicPaymentMatch && request.method === 'POST') return void handlePaymentConfirmation(request, response, publicPaymentMatch[1]);
   if (requestPath.startsWith('/api/')) return sendJson(response, 404, { ok: false, error: 'Ruta API no encontrada' });
 
-  const relativePath = requestPath === '/' ? 'index.html' : requestPath.slice(1);
+  const relativePath = requestPath === '/' ? 'index.html' : requestPath === '/panel' ? 'admin.html' : requestPath.slice(1);
   const filePath = path.resolve(PUBLIC_ROOT, relativePath);
   if (!filePath.startsWith(PUBLIC_ROOT + path.sep)) return send(response, 403, 'text/plain; charset=utf-8', 'Acceso denegado');
   fs.stat(filePath, (error, stats) => {

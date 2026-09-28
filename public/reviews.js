@@ -62,7 +62,7 @@ const footer = document.querySelector('.footer');
 if (footer && !footer.querySelector('.admin-link')) {
   const adminLink = document.createElement('a');
   adminLink.className = 'admin-link';
-  adminLink.href = '/admin.html';
+  adminLink.href = '/panel';
   adminLink.textContent = 'Panel administrador';
   footer.append(adminLink);
 }
