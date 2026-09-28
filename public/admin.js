@@ -41,13 +41,21 @@ function renderQuotes(quotes) {
   });
   quotesElement.querySelectorAll('.payment-link-button').forEach((button) => button.addEventListener('click', async () => {
     const result = button.parentElement.querySelector('.payment-link-result');
-    const data = await request('/api/admin/cotizaciones');
-    authCard.hidden = true;
-    dashboard.hidden = false;
-    renderQuotes(data.quotes);
-    dashboard.querySelector('.eyebrow').textContent = `Sesión: ${username}`;
     button.disabled = true; button.textContent = 'Generando...';
-    try { const data = await request(`/api/admin/cotizaciones/${button.dataset.quoteId}/payment-link`, { method: 'POST' }); await navigator.clipboard.writeText(data.link); result.textContent = 'Link copiado'; result.title = data.link; button.textContent = 'Generar nuevo link'; }
+    try {
+      const data = await request(`/api/admin/cotizaciones/${button.dataset.quoteId}/payment-link`, { method: 'POST' });
+      result.replaceChildren();
+      const link = document.createElement('a');
+      link.href = data.link;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.textContent = 'Abrir link de pago';
+      result.append(link);
+      try { await navigator.clipboard.writeText(data.link); result.title = 'Link copiado al portapapeles'; }
+      catch { result.title = data.link; }
+      button.disabled = false;
+      button.textContent = 'Generar nuevo link';
+    }
     catch (error) { result.textContent = error.message; button.textContent = 'Reintentar'; button.disabled = false; }
   }));
   quotesElement.querySelectorAll('.quote-confirm, .quote-cancel, .quote-delete').forEach((button) => button.addEventListener('click', async () => {
