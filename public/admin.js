@@ -26,6 +26,10 @@ function setSetupMode(enabled) {
   document.getElementById('password').setAttribute('autocomplete', enabled ? 'new-password' : 'current-password');
 }
 
+function getPaymentLink(token) {
+  return `${window.location.origin}/pago.html?token=${encodeURIComponent(token)}`;
+}
+
 function renderQuotes(quotes) {
   dashboardMeta.textContent = `${quotes.length} cotización${quotes.length === 1 ? '' : 'es'} registrada${quotes.length === 1 ? '' : 's'}.`;
   quotesElement.replaceChildren();
@@ -34,7 +38,8 @@ function renderQuotes(quotes) {
     const article = document.createElement('article');
     article.className = 'quote';
     const terminalState = quote.estado === 'confirmado' || quote.estado === 'cancelado';
-    const actions = terminalState ? '' : `<button type="button" class="payment-link-button" data-quote-id="${quote.id}">Generar link de pago</button><button type="button" class="quote-confirm" data-quote-id="${quote.id}">Confirmar pago</button><button type="button" class="quote-cancel" data-quote-id="${quote.id}">Cancelar</button>`;
+    const paymentActions = quote.payment?.token ? `<a class="payment-link" href="${getPaymentLink(quote.payment.token)}" target="_blank" rel="noopener">Abrir link</a><button type="button" class="payment-copy-button" data-payment-token="${quote.payment.token}">Copiar link</button>` : '<button type="button" class="payment-link-button" data-quote-id="' + quote.id + '">Generar link de pago</button>';
+    const actions = terminalState ? '' : `${paymentActions}<button type="button" class="quote-confirm" data-quote-id="${quote.id}">Confirmar pago</button><button type="button" class="quote-cancel" data-quote-id="${quote.id}">Cancelar</button>`;
     article.innerHTML = `<h2></h2><p><strong>Experiencia:</strong> ${quote.experienciaNombre || quote.experiencia}</p><p><strong>Fechas:</strong> ${quote.llegada} a ${quote.salida || 'No aplica'}</p><p><strong>Huéspedes:</strong> ${quote.huespedes}</p><p><strong>Cotización:</strong> ${quote.cotizacion}</p><p><strong>Contacto:</strong> ${quote.email} · ${quote.telefono}</p><p>${quote.comentarios || ''}</p><small>Estado: ${quote.estado} · Pago: ${quote.payment?.status || 'sin link'} · ${new Date(quote.createdAt).toLocaleString('es-CO')}</small><div class="payment-actions">${actions}<button type="button" class="quote-delete" data-quote-id="${quote.id}">Eliminar</button><span class="payment-link-result" role="status"></span></div>`;
     article.querySelector('h2').textContent = quote.nombre;
     quotesElement.append(article);
@@ -53,10 +58,16 @@ function renderQuotes(quotes) {
       result.append(link);
       try { await navigator.clipboard.writeText(data.link); result.title = 'Link copiado al portapapeles'; }
       catch { result.title = data.link; }
-      button.disabled = false;
-      button.textContent = 'Generar nuevo link';
+      const refreshed = await request('/api/admin/cotizaciones');
+      renderQuotes(refreshed.quotes);
     }
     catch (error) { result.textContent = error.message; button.textContent = 'Reintentar'; button.disabled = false; }
+  }));
+  quotesElement.querySelectorAll('.payment-copy-button').forEach((button) => button.addEventListener('click', async () => {
+    const result = button.parentElement.querySelector('.payment-link-result');
+    const link = getPaymentLink(button.dataset.paymentToken);
+    try { await navigator.clipboard.writeText(link); result.textContent = 'Link copiado'; }
+    catch { result.textContent = 'No se pudo copiar automáticamente. Abre el link y cópialo desde el navegador.'; }
   }));
   quotesElement.querySelectorAll('.quote-confirm, .quote-cancel, .quote-delete').forEach((button) => button.addEventListener('click', async () => {
     const action = button.classList.contains('quote-delete') ? 'delete' : button.classList.contains('quote-confirm') ? 'confirmar' : 'cancelar';
