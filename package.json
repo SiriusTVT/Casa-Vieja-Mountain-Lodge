@@ -5,7 +5,8 @@
   "description": "Casa Vieja Mountain Lodge",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "images:upload": "node scripts/upload-images-to-mongodb.js"
   },
   "dependencies": {
     "mongodb": "^7.6.0"

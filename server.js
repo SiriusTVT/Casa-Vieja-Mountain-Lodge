@@ -5,6 +5,18 @@ const crypto = require('node:crypto');
 const { promisify } = require('node:util');
 const { MongoClient, ObjectId } = require('mongodb');
 
+function loadEnvFile() {
+  const envPath = path.join(__dirname, '.env');
+  if (!fs.existsSync(envPath)) return;
+  for (const line of fs.readFileSync(envPath, 'utf8').split(/\r?\n/)) {
+    const match = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
+    if (!match || process.env[match[1]]) continue;
+    process.env[match[1]] = match[2].replace(/^(['"])(.*)\1$/, '$2');
+  }
+}
+
+loadEnvFile();
+
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
 const PUBLIC_ROOT = path.join(__dirname, 'public');
@@ -13,6 +25,7 @@ const mongoClient = MONGODB_URI ? new MongoClient(MONGODB_URI) : null;
 let databasePromise;
 let lastCleanupAt = 0;
 let indexesPromise;
+let imageBucket;
 const sessions = new Map();
 const scryptAsync = promisify(crypto.scrypt);
 
@@ -66,6 +79,30 @@ async function getDatabase() {
   await ensureDatabaseIndexes(database);
   if (Date.now() - lastCleanupAt > 60 * 60 * 1000) { lastCleanupAt = Date.now(); await cleanupCancelledQuotes(database); }
   return database;
+}
+
+async function getImageBucket() {
+  if (!imageBucket) imageBucket = new (require('mongodb').GridFSBucket)(await getDatabase(), { bucketName: 'imagenes' });
+  return imageBucket;
+}
+
+async function handleImage(request, response, imagePath) {
+  if (!mongoClient) return false;
+  try {
+    const bucket = await getImageBucket();
+    const file = await bucket.find({ filename: imagePath }).sort({ uploadDate: -1 }).limit(1).next();
+    if (!file) return false;
+    response.writeHead(200, {
+      'Content-Type': file.contentType || MIME_TYPES[path.extname(imagePath).toLowerCase()] || 'application/octet-stream',
+      'Content-Length': file.length,
+      'Cache-Control': 'public, max-age=31536000, immutable'
+    });
+    bucket.openDownloadStream(file._id).on('error', () => response.destroy()).pipe(response);
+    return true;
+  } catch (error) {
+    console.error('Error cargando imagen desde MongoDB:', error.message);
+    return false;
+  }
 }
 
 async function ensureDatabaseIndexes(database) {
@@ -274,6 +311,16 @@ const server = http.createServer((request, response) => {
   const relativePath = requestPath === '/' ? 'index.html' : requestPath === '/catalogo' ? 'catalogo.html' : requestPath === '/panel' ? 'admin.html' : requestPath.slice(1);
   const filePath = path.resolve(PUBLIC_ROOT, relativePath);
   if (!filePath.startsWith(PUBLIC_ROOT + path.sep)) return send(response, 403, 'text/plain; charset=utf-8', 'Acceso denegado');
+  if (/\.(?:gif|ico|jpeg|jpg|png|svg|webp)$/i.test(relativePath)) {
+    return void handleImage(request, response, relativePath).then((served) => {
+      if (served) return;
+      fs.stat(filePath, (error, stats) => {
+        if (error || !stats.isFile()) return send(response, 404, 'text/plain; charset=utf-8', 'Página no encontrada');
+        response.writeHead(200, { 'Content-Type': MIME_TYPES[path.extname(filePath).toLowerCase()] || 'application/octet-stream' });
+        fs.createReadStream(filePath).pipe(response);
+      });
+    });
+  }
   fs.stat(filePath, (error, stats) => {
     if (error || !stats.isFile()) return send(response, 404, 'text/plain; charset=utf-8', 'Página no encontrada');
     response.writeHead(200, { 'Content-Type': MIME_TYPES[path.extname(filePath).toLowerCase()] || 'application/octet-stream' });
