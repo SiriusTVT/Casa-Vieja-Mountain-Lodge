@@ -40,7 +40,11 @@
           <label for="product-image">Ruta o URL de imagen principal (opcional si seleccionas un archivo)</label><input id="product-image" placeholder="/Productos/imagen.jpeg">
           <label for="product-stock">Stock</label><input id="product-stock" type="number" min="0" step="1" required>
           <label class="checkbox-label"><input id="product-available" type="checkbox" checked> Disponible en el catálogo</label>
-          <label for="product-variants">Variedades (JSON opcional)</label><textarea id="product-variants" rows="5" placeholder='[{"name":"Rojo","image":"/Productos/rojo.jpeg"}]'></textarea>
+          <label class="checkbox-label"><input id="product-has-variants" type="checkbox"> Este producto tiene variedades</label>
+          <div class="variants-editor" id="variants-editor" hidden>
+            <div class="variants-editor-header"><span>Variedades</span><button type="button" class="secondary-button" id="add-variant">Agregar variedad</button></div>
+            <div id="variant-rows"></div>
+          </div>
           <div class="form-actions"><button type="submit">Guardar producto</button><button type="button" class="secondary-button" id="cancel-product">Cancelar</button></div>
         </form>
         <div class="admin-products" id="admin-products"></div>

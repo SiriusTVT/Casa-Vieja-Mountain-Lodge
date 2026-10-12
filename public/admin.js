@@ -19,9 +19,23 @@ const productFields = {
   imageFile: document.getElementById('product-image-file'),
   stock: document.getElementById('product-stock'),
   available: document.getElementById('product-available'),
-  variants: document.getElementById('product-variants')
+  hasVariants: document.getElementById('product-has-variants')
 };
 let setupMode = false;
+
+function createVariantRow(variant = {}) {
+  const row = document.createElement('div');
+  row.className = 'variant-row';
+  row.innerHTML = '<input class="variant-name" placeholder="Nombre de la variedad" required><input class="variant-image-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"><input class="variant-image-url" placeholder="Ruta existente opcional"><button type="button" class="danger-button remove-variant" aria-label="Eliminar variedad">×</button>';
+  row.querySelector('.variant-name').value = variant.name || '';
+  row.querySelector('.variant-image-url').value = variant.image || '';
+  row.querySelector('.remove-variant').addEventListener('click', () => row.remove());
+  document.getElementById('variant-rows').append(row);
+}
+
+function getVariantRows() {
+  return [...document.querySelectorAll('.variant-row')];
+}
 
 async function request(path, options = {}) {
   const response = await fetch(path, { headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }, ...options });
@@ -47,7 +61,9 @@ function resetProductForm() {
   productForm.reset();
   productFields.id.value = '';
   productFields.available.checked = true;
-  productFields.variants.value = '';
+  productFields.hasVariants.checked = false;
+  document.getElementById('variant-rows').replaceChildren();
+  document.getElementById('variants-editor').hidden = true;
   productForm.hidden = true;
 }
 
@@ -58,7 +74,10 @@ function fillProductForm(product) {
   productFields.image.value = product.image;
   productFields.stock.value = product.stock;
   productFields.available.checked = product.available;
-  productFields.variants.value = product.variants?.length ? JSON.stringify(product.variants, null, 2) : '';
+  productFields.hasVariants.checked = Boolean(product.variants?.length);
+  document.getElementById('variant-rows').replaceChildren();
+  product.variants?.forEach((variant) => createVariantRow(variant));
+  document.getElementById('variants-editor').hidden = !productFields.hasVariants.checked;
   productForm.hidden = false;
   productForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -124,10 +143,18 @@ document.getElementById('new-product').addEventListener('click', () => {
   productFields.name.focus();
 });
 document.getElementById('cancel-product').addEventListener('click', resetProductForm);
+productFields.hasVariants.addEventListener('change', () => {
+  document.getElementById('variants-editor').hidden = !productFields.hasVariants.checked;
+  if (productFields.hasVariants.checked && !getVariantRows().length) createVariantRow();
+  if (!productFields.hasVariants.checked) document.getElementById('variant-rows').replaceChildren();
+});
+document.getElementById('add-variant').addEventListener('click', () => createVariantRow());
 productForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   productsStatus.textContent = '';
   const id = productFields.id.value;
+  const button = productForm.querySelector('button[type="submit"]');
+  button.disabled = true;
   let image = productFields.image.value.trim();
   try {
     const file = productFields.imageFile.files[0];
@@ -148,16 +175,45 @@ productForm.addEventListener('submit', async (event) => {
     productsStatus.textContent = error.message;
     return;
   }
+  const variants = [];
+  if (productFields.hasVariants.checked) {
+    for (const row of getVariantRows()) {
+      const name = row.querySelector('.variant-name').value.trim();
+      let variantImage = row.querySelector('.variant-image-url').value.trim();
+      const file = row.querySelector('.variant-image-file').files[0];
+      if (!name) { productsStatus.textContent = 'Cada variedad debe tener un nombre.'; button.disabled = false; return; }
+      if (file) {
+        try {
+          const dataUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = () => reject(new Error('No se pudo leer la imagen de una variedad.'));
+            reader.readAsDataURL(file);
+          });
+          const uploaded = await request('/api/admin/images', {
+            method: 'POST',
+            body: JSON.stringify({ filename: file.name, mimeType: file.type, data: dataUrl })
+          });
+          variantImage = uploaded.url;
+        } catch (error) {
+          productsStatus.textContent = error.message;
+          button.disabled = false;
+          return;
+        }
+      }
+      if (!variantImage) { productsStatus.textContent = `Agrega una imagen para "${name}".`; button.disabled = false; return; }
+      variants.push({ name, image: variantImage });
+    }
+    if (!variants.length) { productsStatus.textContent = 'Agrega al menos una variedad.'; button.disabled = false; return; }
+  }
   const payload = {
     name: productFields.name.value,
     description: productFields.description.value,
     image,
     stock: Number(productFields.stock.value),
     available: productFields.available.checked,
-    variants: productFields.variants.value || '[]'
+    variants
   };
-  const button = productForm.querySelector('button[type="submit"]');
-  button.disabled = true;
   try {
     await request(id ? `/api/admin/products/${id}` : '/api/admin/products', { method: id ? 'PUT' : 'POST', body: JSON.stringify(payload) });
     resetProductForm();
