@@ -1,10 +1,4 @@
 [
-  {"id":"p1","name":"Habitación sencilla · noche","price":"$130.000","description":"Habitación amplia y fresca dentro de la casa histórica.","available":true,"image":"/Casa-Lodge-Img/imagen_38.jpg"},
-  {"id":"p2","name":"Una noche para una pareja · noche","price":"$200.000","description":"Estadía para pareja con ambiente privado.","available":true,"image":"/Casa-Lodge-Img/imagen_05.jpg"},
-  {"id":"p3","name":"Pasadía · por persona","price":"$80.000","description":"Acceso al día: senderos, río y espacios comunes.","available":true,"image":"/Casa-Lodge-Img/imagen_31.jpg"},
-  {"id":"p4","name":"Terapia de bienestar","price":"Desde $80.000","description":"Sesiones de bienestar y biodescodificación en contacto con la naturaleza.","available":true,"image":"/Casa-Lodge-Img/imagen_28.jpg"},
-  {"id":"p5","name":"Fotografía de naturaleza","price":"$35.000","description":"Salida guiada para fotografía de aves y paisaje.","available":false,"image":"/Casa-Lodge-Img/imagen_32.jpg"},
-  {"id":"p6","name":"Servicios de alimentación","price":"Desde $18.000","description":"Opciones de alimentación para desayuno, almuerzo y cena.","available":true,"image":"/Casa-Lodge-Img/imagen_09.jpg"},
   {
     "id":"m1",
     "name":"Pulseras de vidrio soplado y bambú",

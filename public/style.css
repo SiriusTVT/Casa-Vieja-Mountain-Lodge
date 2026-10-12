@@ -200,13 +200,35 @@ figcaption { margin-top: 10px; color: var(--earth); font: 10px var(--sans); lett
 /* Catálogo: cuadrícula de productos */
 .catalog-section .section-heading { max-width: 920px; margin: 0 auto 28px; }
 .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; max-width: 1220px; margin: 0 auto; }
-.product-card { background: var(--white); border: 1px solid var(--line); padding: 18px; display: flex; flex-direction: column; gap: 10px; }
-.product-card img { width: 100%; height: 140px; object-fit: cover; border: 1px solid rgba(0,0,0,.04); }
+.product-card { background: var(--white); border: 1px solid var(--line); padding: 18px; display: flex; flex-direction: column; gap: 10px; cursor: pointer; transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease; }
+.product-card:hover, .product-card:focus-visible { border-color: var(--gold); box-shadow: 0 12px 30px rgba(23,35,28,.12); transform: translateY(-3px); outline: none; }
+.product-card img { width: 100%; height: 180px; object-fit: contain; background: #f4f0e8; border: 1px solid rgba(0,0,0,.04); }
 .product-card h3 { margin: 0; color: var(--forest); font-size: 18px; font-weight: 400; }
 .product-card p { margin: 0; color: var(--earth); font-size: 14px; }
 .product-meta { display: flex; align-items: baseline; gap: 8px; }
 .product-stock { color: var(--forest); font: 700 13px var(--sans); }
-.product-variants-label { display: flex; flex-direction: column; gap: 5px; color: var(--earth); font: 700 11px var(--sans); letter-spacing: .08em; text-transform: uppercase; }
-.product-variants { width: 100%; padding: 8px; border: 1px solid var(--line); background: var(--white); color: var(--forest); font: 13px var(--sans); letter-spacing: normal; text-transform: none; }
-.product-actions { margin-top: 8px; display: flex; gap: 8px; }
-@media (max-width: 700px) { .product-card img { height: 120px; } }
+.modal-open { overflow: hidden; }
+.product-modal { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 24px; }
+.product-modal[hidden] { display: none; }
+.product-modal-backdrop { position: absolute; inset: 0; background: rgba(23,35,28,.72); backdrop-filter: blur(8px); }
+.product-modal-content { position: relative; width: min(900px, 100%); max-height: min(720px, 92vh); overflow: auto; background: var(--cream); box-shadow: 0 25px 80px rgba(0,0,0,.3); }
+.product-modal-close { position: absolute; top: 12px; right: 15px; z-index: 1; width: 38px; height: 38px; border: 0; border-radius: 50%; background: var(--deep); color: var(--white); font: 28px/1 Arial; cursor: pointer; }
+.product-detail { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(280px, .9fr); gap: 34px; padding: 34px; }
+.product-detail-media { display: grid; min-height: 430px; place-items: center; background: #f4f0e8; }
+.product-detail-image { display: block; width: 100%; height: 430px; object-fit: contain; }
+.product-detail-copy { align-self: center; padding: 18px 10px 18px 0; }
+.product-detail-title { margin-bottom: 16px; font-size: clamp(32px, 4vw, 54px); }
+.product-detail-description { color: var(--earth); font-size: 17px; }
+.product-detail-stock { color: var(--forest); font: 700 14px var(--sans); }
+.product-detail-variants { margin: 24px 0; }
+.product-detail-variants-heading { margin-bottom: 10px; color: var(--earth); font: 700 11px var(--sans); letter-spacing: .12em; text-transform: uppercase; }
+.variant-button { display: inline-flex; width: 100%; align-items: center; gap: 12px; margin: 0 0 8px; padding: 7px; border: 1px solid var(--line); background: var(--white); color: var(--forest); text-align: left; cursor: pointer; }
+.variant-button img { width: 52px; height: 52px; object-fit: contain; background: #f4f0e8; }
+.variant-button span { font: 13px var(--sans); }
+.variant-button.is-selected { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(201,168,106,.2); }
+@media (max-width: 700px) {
+  .product-card img { height: 150px; }
+  .product-detail { grid-template-columns: 1fr; gap: 18px; padding: 20px; }
+  .product-detail-media, .product-detail-image { min-height: 280px; height: 280px; }
+  .product-detail-copy { padding: 0; }
+}
