@@ -128,6 +128,99 @@ async function getAdminCollection() {
   return collection;
 }
 
+function productPayload(data, existing = {}) {
+  const name = String(data.name ?? existing.name ?? '').trim();
+  const description = String(data.description ?? existing.description ?? '').trim();
+  const image = String(data.image ?? existing.image ?? '').trim();
+  const stock = Number(data.stock ?? existing.stock);
+  const available = data.available === undefined ? existing.available !== false : Boolean(data.available);
+  let variants = data.variants ?? existing.variants ?? [];
+  if (typeof variants === 'string') {
+    try { variants = JSON.parse(variants || '[]'); } catch { throw new Error('Las variedades deben ser un JSON válido.'); }
+  }
+  if (!name || !description || !image || !Number.isInteger(stock) || stock < 0 || !Array.isArray(variants)) throw new Error('Completa nombre, descripción, imagen y un stock válido.');
+  if (variants.some((variant) => !variant || typeof variant.name !== 'string' || typeof variant.image !== 'string' || !variant.name.trim() || !variant.image.trim())) throw new Error('Cada variedad necesita nombre e imagen.');
+  return { name, description, image, stock, available, variants: variants.map((variant) => ({ name: variant.name.trim(), image: variant.image.trim() })), updatedAt: new Date() };
+}
+
+async function getProductCollection() {
+  const database = await getDatabase();
+  const collection = database.collection('productos_catalogo');
+  if (await collection.countDocuments({}) === 0) {
+    const seedPath = path.join(PUBLIC_ROOT, 'products.json');
+    const seedProducts = JSON.parse(fs.readFileSync(seedPath, 'utf8')).map(({ id, ...product }) => ({ ...product, legacyId: id, createdAt: new Date(), updatedAt: new Date() }));
+    if (seedProducts.length) await collection.insertMany(seedProducts);
+  }
+  return collection;
+}
+
+function publicProduct(product) {
+  return { id: String(product._id), name: product.name, description: product.description, stock: product.stock, available: product.available, image: product.image, variants: product.variants || [] };
+}
+
+async function handlePublicProducts(response) {
+  try {
+    const products = await (await getProductCollection()).find({}).sort({ createdAt: 1 }).toArray();
+    return sendJson(response, 200, products.map(publicProduct), { 'Cache-Control': 'no-store' });
+  } catch (error) {
+    console.error('Error cargando productos:', error.message);
+    return sendJson(response, 503, { ok: false, error: 'No se pudieron cargar los productos.' });
+  }
+}
+
+async function handleAdminProducts(request, response) {
+  if (!requireAdmin(request, response)) return;
+  try {
+    const products = await (await getProductCollection()).find({}).sort({ createdAt: 1 }).toArray();
+    return sendJson(response, 200, { ok: true, products: products.map(publicProduct) });
+  } catch (error) {
+    console.error('Error cargando productos para administración:', error.message);
+    return sendJson(response, 503, { ok: false, error: 'No se pudieron cargar los productos.' });
+  }
+}
+
+async function handleAdminProductCreate(request, response) {
+  if (!requireAdmin(request, response)) return;
+  try {
+    const data = await readJson(request);
+    const product = { ...productPayload(data), createdAt: new Date() };
+    const result = await (await getProductCollection()).insertOne(product);
+    return sendJson(response, 201, { ok: true, product: publicProduct({ ...product, _id: result.insertedId }) });
+  } catch (error) {
+    console.error('Error creando producto:', error.message);
+    return sendJson(response, 400, { ok: false, error: error.message });
+  }
+}
+
+async function handleAdminProductUpdate(request, response, productId) {
+  if (!requireAdmin(request, response)) return;
+  if (!ObjectId.isValid(productId)) return sendJson(response, 400, { ok: false, error: 'Producto no válido.' });
+  try {
+    const collection = await getProductCollection();
+    const current = await collection.findOne({ _id: new ObjectId(productId) });
+    if (!current) return sendJson(response, 404, { ok: false, error: 'Producto no encontrado.' });
+    const data = await readJson(request);
+    const update = productPayload(data, current);
+    await collection.updateOne({ _id: current._id }, { $set: update });
+    return sendJson(response, 200, { ok: true, product: publicProduct({ ...current, ...update }) });
+  } catch (error) {
+    console.error('Error actualizando producto:', error.message);
+    return sendJson(response, 400, { ok: false, error: error.message });
+  }
+}
+
+async function handleAdminProductDelete(request, response, productId) {
+  if (!requireAdmin(request, response)) return;
+  if (!ObjectId.isValid(productId)) return sendJson(response, 400, { ok: false, error: 'Producto no válido.' });
+  try {
+    const result = await (await getProductCollection()).deleteOne({ _id: new ObjectId(productId) });
+    return result.deletedCount ? sendJson(response, 200, { ok: true }) : sendJson(response, 404, { ok: false, error: 'Producto no encontrado.' });
+  } catch (error) {
+    console.error('Error eliminando producto:', error.message);
+    return sendJson(response, 503, { ok: false, error: 'No se pudo eliminar el producto.' });
+  }
+}
+
 async function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) {
   const derivedKey = await scryptAsync(password, salt, 64);
   return `${salt}:${derivedKey.toString('hex')}`;
@@ -291,12 +384,18 @@ const server = http.createServer((request, response) => {
   const requestPath = decodeURIComponent(request.url.split('?')[0]);
   if (requestPath === '/admin.html') return send(response, 404, 'text/plain; charset=utf-8', 'Página no encontrada');
   if (requestPath === '/api/cotizaciones' && request.method === 'POST') return void handleQuote(request, response);
+  if (requestPath === '/api/products' && request.method === 'GET') return void handlePublicProducts(response);
   if (requestPath === '/api/admin/status' && request.method === 'GET') return void handleAdminStatus(response);
   if (requestPath === '/api/admin/register' && request.method === 'POST') return void handleAdminRegister(request, response);
   if (requestPath === '/api/admin/login' && request.method === 'POST') return void handleAdminLogin(request, response);
   if (requestPath === '/api/admin/logout' && request.method === 'POST') { sessions.delete(cookies(request).admin_session); return sendJson(response, 200, { ok: true }, { 'Set-Cookie': 'admin_session=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0' }); }
   if (requestPath === '/api/admin/me' && request.method === 'GET') { const session = requireAdmin(request, response); return session ? sendJson(response, 200, { ok: true, username: session.username }) : undefined; }
   if (requestPath === '/api/admin/cotizaciones' && request.method === 'GET') return void handleAdminQuotes(request, response);
+  if (requestPath === '/api/admin/products' && request.method === 'GET') return void handleAdminProducts(request, response);
+  if (requestPath === '/api/admin/products' && request.method === 'POST') return void handleAdminProductCreate(request, response);
+  const productUpdateMatch = requestPath.match(/^\/api\/admin\/products\/([^/]+)$/);
+  if (productUpdateMatch && request.method === 'PUT') return void handleAdminProductUpdate(request, response, productUpdateMatch[1]);
+  if (productUpdateMatch && request.method === 'DELETE') return void handleAdminProductDelete(request, response, productUpdateMatch[1]);
   const paymentLinkMatch = requestPath.match(/^\/api\/admin\/cotizaciones\/([^/]+)\/payment-link$/);
   if (paymentLinkMatch && request.method === 'POST') return void handlePaymentLink(request, response, paymentLinkMatch[1]);
   const quoteStatusMatch = requestPath.match(/^\/api\/admin\/cotizaciones\/([^/]+)\/(confirmar|cancelar)$/);

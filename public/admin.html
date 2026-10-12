@@ -24,8 +24,26 @@
     </section>
     <section class="dashboard" id="dashboard" hidden>
          <header class="dashboard-header"><div><p class="eyebrow">Panel privado</p><h1>Cotizaciones</h1></div><div class="dashboard-actions"><button id="refresh-quotes" type="button">Actualizar</button><button id="logout">Cerrar sesión</button></div></header>
-      <div class="dashboard-meta" id="dashboard-meta"></div>
-      <div class="quotes" id="quotes"></div>
+      <div class="admin-tabs"><button type="button" class="admin-tab is-active" data-admin-tab="quotes">Cotizaciones</button><button type="button" class="admin-tab" data-admin-tab="products">Productos</button></div>
+      <section class="admin-panel" id="quotes-panel">
+        <div class="dashboard-meta" id="dashboard-meta"></div>
+        <div class="quotes" id="quotes"></div>
+      </section>
+      <section class="admin-panel" id="products-panel" hidden>
+        <div class="products-header"><div><p class="eyebrow">Catálogo</p><h2>Gestionar productos</h2></div><button type="button" id="new-product">Agregar producto</button></div>
+        <p class="status" id="products-status" role="status"></p>
+        <form class="product-form" id="product-form" hidden>
+          <input type="hidden" id="product-id">
+          <label for="product-name">Nombre</label><input id="product-name" required>
+          <label for="product-description">Descripción</label><textarea id="product-description" rows="3" required></textarea>
+          <label for="product-image">Ruta o URL de imagen principal</label><input id="product-image" placeholder="/Productos/imagen.jpeg" required>
+          <label for="product-stock">Stock</label><input id="product-stock" type="number" min="0" step="1" required>
+          <label class="checkbox-label"><input id="product-available" type="checkbox" checked> Disponible en el catálogo</label>
+          <label for="product-variants">Variedades (JSON opcional)</label><textarea id="product-variants" rows="5" placeholder='[{"name":"Rojo","image":"/Productos/rojo.jpeg"}]'></textarea>
+          <div class="form-actions"><button type="submit">Guardar producto</button><button type="button" class="secondary-button" id="cancel-product">Cancelar</button></div>
+        </form>
+        <div class="admin-products" id="admin-products"></div>
+      </section>
     </section>
   </main>
   <script src="/admin.js"></script>

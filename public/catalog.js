@@ -1,6 +1,6 @@
 async function fetchProducts() {
   try {
-    const res = await fetch('/products.json');
+    const res = await fetch('/api/products');
     if (!res.ok) throw new Error('No se pudo cargar la lista de productos');
     return await res.json();
   } catch (err) { console.error(err); return []; }

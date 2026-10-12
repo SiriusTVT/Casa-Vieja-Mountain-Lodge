@@ -8,6 +8,18 @@ const authStatus = document.getElementById('auth-status');
 const dashboard = document.getElementById('dashboard');
 const quotesElement = document.getElementById('quotes');
 const dashboardMeta = document.getElementById('dashboard-meta');
+const productsElement = document.getElementById('admin-products');
+const productsStatus = document.getElementById('products-status');
+const productForm = document.getElementById('product-form');
+const productFields = {
+  id: document.getElementById('product-id'),
+  name: document.getElementById('product-name'),
+  description: document.getElementById('product-description'),
+  image: document.getElementById('product-image'),
+  stock: document.getElementById('product-stock'),
+  available: document.getElementById('product-available'),
+  variants: document.getElementById('product-variants')
+};
 let setupMode = false;
 
 async function request(path, options = {}) {
@@ -29,6 +41,109 @@ function setSetupMode(enabled) {
 function getPaymentLink(token) {
   return `${window.location.origin}/pago.html?token=${encodeURIComponent(token)}`;
 }
+
+function resetProductForm() {
+  productForm.reset();
+  productFields.id.value = '';
+  productFields.available.checked = true;
+  productFields.variants.value = '';
+  productForm.hidden = true;
+}
+
+function fillProductForm(product) {
+  productFields.id.value = product.id;
+  productFields.name.value = product.name;
+  productFields.description.value = product.description;
+  productFields.image.value = product.image;
+  productFields.stock.value = product.stock;
+  productFields.available.checked = product.available;
+  productFields.variants.value = product.variants?.length ? JSON.stringify(product.variants, null, 2) : '';
+  productForm.hidden = false;
+  productForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderProducts(products) {
+  productsElement.replaceChildren();
+  if (!products.length) { productsElement.innerHTML = '<p>Aún no hay productos.</p>'; return; }
+  products.forEach((product) => {
+    const article = document.createElement('article');
+    article.className = 'admin-product';
+    const image = document.createElement('img');
+    image.src = product.image;
+    image.alt = product.name;
+    const content = document.createElement('div');
+    content.className = 'admin-product-content';
+    const title = document.createElement('h3');
+    title.textContent = product.name;
+    const details = document.createElement('p');
+    details.textContent = `Stock: ${product.stock} · ${product.available ? 'Disponible' : 'Oculto'} · ${product.variants?.length || 0} variedades`;
+    const actions = document.createElement('div');
+    actions.className = 'product-admin-actions';
+    const edit = document.createElement('button');
+    edit.type = 'button';
+    edit.textContent = 'Editar';
+    edit.addEventListener('click', () => fillProductForm(product));
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'danger-button';
+    remove.textContent = 'Eliminar';
+    remove.addEventListener('click', async () => {
+      if (!window.confirm(`¿Eliminar "${product.name}" del catálogo?`)) return;
+      try {
+        await request(`/api/admin/products/${product.id}`, { method: 'DELETE' });
+        await loadProducts();
+      } catch (error) { productsStatus.textContent = error.message; }
+    });
+    actions.append(edit, remove);
+    content.append(title, details, actions);
+    article.append(image, content);
+    productsElement.append(article);
+  });
+}
+
+async function loadProducts() {
+  const data = await request('/api/admin/products');
+  renderProducts(data.products);
+  productsStatus.textContent = `${data.products.length} producto${data.products.length === 1 ? '' : 's'} en el catálogo.`;
+}
+
+document.querySelectorAll('[data-admin-tab]').forEach((tab) => tab.addEventListener('click', async () => {
+  document.querySelectorAll('[data-admin-tab]').forEach((item) => item.classList.toggle('is-active', item === tab));
+  const productsTab = tab.dataset.adminTab === 'products';
+  document.getElementById('quotes-panel').hidden = productsTab;
+  document.getElementById('products-panel').hidden = !productsTab;
+  if (productsTab) {
+    try { await loadProducts(); } catch (error) { productsStatus.textContent = error.message; }
+  }
+}));
+
+document.getElementById('new-product').addEventListener('click', () => {
+  resetProductForm();
+  productForm.hidden = false;
+  productFields.name.focus();
+});
+document.getElementById('cancel-product').addEventListener('click', resetProductForm);
+productForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  productsStatus.textContent = '';
+  const id = productFields.id.value;
+  const payload = {
+    name: productFields.name.value,
+    description: productFields.description.value,
+    image: productFields.image.value,
+    stock: Number(productFields.stock.value),
+    available: productFields.available.checked,
+    variants: productFields.variants.value || '[]'
+  };
+  const button = productForm.querySelector('button[type="submit"]');
+  button.disabled = true;
+  try {
+    await request(id ? `/api/admin/products/${id}` : '/api/admin/products', { method: id ? 'PUT' : 'POST', body: JSON.stringify(payload) });
+    resetProductForm();
+    await loadProducts();
+  } catch (error) { productsStatus.textContent = error.message; }
+  finally { button.disabled = false; }
+});
 
 function renderQuotes(quotes) {
   dashboardMeta.textContent = `${quotes.length} cotización${quotes.length === 1 ? '' : 'es'} registrada${quotes.length === 1 ? '' : 's'}.`;
