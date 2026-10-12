@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const { promisify } = require('node:util');
-const { MongoClient, ObjectId } = require('mongodb');
+const { MongoClient, ObjectId, GridFSBucket } = require('mongodb');
 
 function loadEnvFile() {
   const envPath = path.join(__dirname, '.env');
@@ -46,12 +46,12 @@ function sendJson(response, statusCode, body, headers = {}) {
   response.end(JSON.stringify(body));
 }
 
-function readJson(request) {
+function readJson(request, maxLength = 100000) {
   return new Promise((resolve, reject) => {
     let body = '';
     request.on('data', (chunk) => {
       body += chunk;
-      if (body.length > 100000) reject(new Error('Payload demasiado grande'));
+      if (body.length > maxLength) reject(new Error('Payload demasiado grande'));
     });
     request.on('end', () => {
       try { resolve(JSON.parse(body || '{}')); } catch { reject(new Error('JSON inválido')); }
@@ -218,6 +218,43 @@ async function handleAdminProductDelete(request, response, productId) {
   } catch (error) {
     console.error('Error eliminando producto:', error.message);
     return sendJson(response, 503, { ok: false, error: 'No se pudo eliminar el producto.' });
+  }
+}
+
+async function handleAdminImageUpload(request, response) {
+  if (!requireAdmin(request, response)) return;
+  try {
+    const data = await readJson(request, 12 * 1024 * 1024);
+    const mimeType = String(data.mimeType || '');
+    const encoded = String(data.data || '');
+    if (!/^image\/(?:jpeg|png|webp|gif|svg\+xml)$/.test(mimeType) || !encoded) return sendJson(response, 400, { ok: false, error: 'Selecciona una imagen válida.' });
+    const buffer = Buffer.from(encoded.replace(/^data:[^;]+;base64,/, ''), 'base64');
+    if (!buffer.length || buffer.length > 8 * 1024 * 1024) return sendJson(response, 400, { ok: false, error: 'La imagen debe pesar máximo 8 MB.' });
+    const bucket = new GridFSBucket(await getDatabase(), { bucketName: 'imagenes' });
+    const filename = `admin-${crypto.randomUUID()}`;
+    await new Promise((resolve, reject) => {
+      const upload = bucket.openUploadStream(filename, { contentType: mimeType, metadata: { source: 'catalog-admin', originalName: String(data.filename || '').slice(0, 150) } });
+      upload.on('error', reject).on('finish', resolve);
+      upload.end(buffer);
+    });
+    return sendJson(response, 201, { ok: true, url: `/media/${filename}` });
+  } catch (error) {
+    console.error('Error subiendo imagen de producto:', error.message);
+    return sendJson(response, 400, { ok: false, error: 'No se pudo subir la imagen.' });
+  }
+}
+
+async function handleMedia(request, response, mediaId) {
+  if (!mongoClient) return send(response, 503, 'text/plain; charset=utf-8', 'MongoDB no está disponible.');
+  try {
+    const bucket = new GridFSBucket(await getDatabase(), { bucketName: 'imagenes' });
+    const file = await bucket.find({ filename: mediaId }).sort({ uploadDate: -1 }).limit(1).next();
+    if (!file) return send(response, 404, 'text/plain; charset=utf-8', 'Imagen no encontrada.');
+    response.writeHead(200, { 'Content-Type': file.contentType || 'application/octet-stream', 'Content-Length': file.length, 'Cache-Control': 'public, max-age=31536000, immutable' });
+    bucket.openDownloadStream(file._id).on('error', () => response.destroy()).pipe(response);
+  } catch (error) {
+    console.error('Error sirviendo imagen de producto:', error.message);
+    send(response, 503, 'text/plain; charset=utf-8', 'No se pudo cargar la imagen.');
   }
 }
 
@@ -393,6 +430,7 @@ const server = http.createServer((request, response) => {
   if (requestPath === '/api/admin/cotizaciones' && request.method === 'GET') return void handleAdminQuotes(request, response);
   if (requestPath === '/api/admin/products' && request.method === 'GET') return void handleAdminProducts(request, response);
   if (requestPath === '/api/admin/products' && request.method === 'POST') return void handleAdminProductCreate(request, response);
+  if (requestPath === '/api/admin/images' && request.method === 'POST') return void handleAdminImageUpload(request, response);
   const productUpdateMatch = requestPath.match(/^\/api\/admin\/products\/([^/]+)$/);
   if (productUpdateMatch && request.method === 'PUT') return void handleAdminProductUpdate(request, response, productUpdateMatch[1]);
   if (productUpdateMatch && request.method === 'DELETE') return void handleAdminProductDelete(request, response, productUpdateMatch[1]);
@@ -406,6 +444,8 @@ const server = http.createServer((request, response) => {
   if (publicPaymentMatch && request.method === 'GET') return void handlePublicPayment(request, response, publicPaymentMatch[1]);
   if (publicPaymentMatch && request.method === 'POST') return void handlePaymentConfirmation(request, response, publicPaymentMatch[1]);
   if (requestPath.startsWith('/api/')) return sendJson(response, 404, { ok: false, error: 'Ruta API no encontrada' });
+  const mediaMatch = requestPath.match(/^\/media\/([^/]+)$/);
+  if (mediaMatch && request.method === 'GET') return void handleMedia(request, response, mediaMatch[1]);
 
   const relativePath = requestPath === '/' ? 'index.html' : requestPath === '/catalogo' ? 'catalogo.html' : requestPath === '/panel' ? 'admin.html' : requestPath.slice(1);
   const filePath = path.resolve(PUBLIC_ROOT, relativePath);

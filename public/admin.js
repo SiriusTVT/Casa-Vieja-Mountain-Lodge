@@ -16,6 +16,7 @@ const productFields = {
   name: document.getElementById('product-name'),
   description: document.getElementById('product-description'),
   image: document.getElementById('product-image'),
+  imageFile: document.getElementById('product-image-file'),
   stock: document.getElementById('product-stock'),
   available: document.getElementById('product-available'),
   variants: document.getElementById('product-variants')
@@ -127,10 +128,30 @@ productForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   productsStatus.textContent = '';
   const id = productFields.id.value;
+  let image = productFields.image.value.trim();
+  try {
+    const file = productFields.imageFile.files[0];
+    if (file) {
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('No se pudo leer la imagen seleccionada.'));
+        reader.readAsDataURL(file);
+      });
+      const uploaded = await request('/api/admin/images', {
+        method: 'POST',
+        body: JSON.stringify({ filename: file.name, mimeType: file.type, data: dataUrl })
+      });
+      image = uploaded.url;
+    }
+  } catch (error) {
+    productsStatus.textContent = error.message;
+    return;
+  }
   const payload = {
     name: productFields.name.value,
     description: productFields.description.value,
-    image: productFields.image.value,
+    image,
     stock: Number(productFields.stock.value),
     available: productFields.available.checked,
     variants: productFields.variants.value || '[]'

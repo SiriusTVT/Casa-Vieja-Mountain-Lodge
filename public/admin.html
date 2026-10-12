@@ -36,7 +36,8 @@
           <input type="hidden" id="product-id">
           <label for="product-name">Nombre</label><input id="product-name" required>
           <label for="product-description">Descripción</label><textarea id="product-description" rows="3" required></textarea>
-          <label for="product-image">Ruta o URL de imagen principal</label><input id="product-image" placeholder="/Productos/imagen.jpeg" required>
+          <label for="product-image-file">Imagen principal desde tu equipo</label><input id="product-image-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml">
+          <label for="product-image">Ruta o URL de imagen principal (opcional si seleccionas un archivo)</label><input id="product-image" placeholder="/Productos/imagen.jpeg">
           <label for="product-stock">Stock</label><input id="product-stock" type="number" min="0" step="1" required>
           <label class="checkbox-label"><input id="product-available" type="checkbox" checked> Disponible en el catálogo</label>
           <label for="product-variants">Variedades (JSON opcional)</label><textarea id="product-variants" rows="5" placeholder='[{"name":"Rojo","image":"/Productos/rojo.jpeg"}]'></textarea>
