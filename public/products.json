@@ -4,5 +4,66 @@
   {"id":"p3","name":"Pasadía · por persona","price":"$80.000","description":"Acceso al día: senderos, río y espacios comunes.","available":true,"image":"/Casa-Lodge-Img/imagen_31.jpg"},
   {"id":"p4","name":"Terapia de bienestar","price":"Desde $80.000","description":"Sesiones de bienestar y biodescodificación en contacto con la naturaleza.","available":true,"image":"/Casa-Lodge-Img/imagen_28.jpg"},
   {"id":"p5","name":"Fotografía de naturaleza","price":"$35.000","description":"Salida guiada para fotografía de aves y paisaje.","available":false,"image":"/Casa-Lodge-Img/imagen_32.jpg"},
-  {"id":"p6","name":"Servicios de alimentación","price":"Desde $18.000","description":"Opciones de alimentación para desayuno, almuerzo y cena.","available":true,"image":"/Casa-Lodge-Img/imagen_09.jpg"}
+  {"id":"p6","name":"Servicios de alimentación","price":"Desde $18.000","description":"Opciones de alimentación para desayuno, almuerzo y cena.","available":true,"image":"/Casa-Lodge-Img/imagen_09.jpg"},
+  {
+    "id":"m1",
+    "name":"Pulseras de vidrio soplado y bambú",
+    "description":"Pulseras artesanales con cuentas de vidrio soplado y piezas de bambú.",
+    "stock":10,
+    "available":true,
+    "image":"/Productos/pulseras con cuencas de vidrio soplado y bambu.jpeg"
+  },
+  {
+    "id":"m2",
+    "name":"Pulseras y collares kumihimo",
+    "description":"Accesorios tejidos a mano con diferentes combinaciones de colores y acabados.",
+    "stock":10,
+    "available":true,
+    "image":"/Productos/Collares1 y pulseras de tejido kumihimo.jpeg",
+    "variants":[
+      {"name":"Negro con detalles de colores","image":"/Productos/Collares1 y pulseras de tejido kumihimo.jpeg"},
+      {"name":"Amarillo, azul y rojo","image":"/Productos/Collares2 y pulseras de tejido kumihimo.jpeg"},
+      {"name":"Verde con dije de piedra","image":"/Productos/Collares3 y pulseras de tejido kumihimo.jpeg"}
+    ]
+  },
+  {
+    "id":"m3",
+    "name":"Mugs con colibríes",
+    "description":"Mugs decorativos inspirados en los colibríes de Casa Vieja.",
+    "stock":10,
+    "available":true,
+    "image":"/Productos/Mugs con colibris.jpeg"
+  },
+  {
+    "id":"m4",
+    "name":"Llaveros kumihimo personalizados",
+    "description":"Llaveros tejidos con detalles personalizados y combinaciones únicas.",
+    "stock":10,
+    "available":true,
+    "image":"/Productos/llaveros1 de kumihimo personalizados.jpeg",
+    "variants":[
+      {"name":"Trenzado fucsia y turquesa","image":"/Productos/llaveros1 de kumihimo personalizados.jpeg"},
+      {"name":"Trenzado verde personalizado","image":"/Productos/llaveros2 de kumihimo personalizados..jpeg"}
+    ]
+  },
+  {
+    "id":"m5",
+    "name":"Pines metálicos",
+    "description":"Pines coleccionables con motivos de Colombia y transporte tradicional.",
+    "stock":10,
+    "available":true,
+    "image":"/Productos/pines metalicos.jpeg",
+    "variants":[
+      {"name":"Bus colombiano","image":"/Productos/pines metalicos.jpeg"},
+      {"name":"Colombia","image":"/Productos/pines metalicos.jpeg"}
+    ]
+  },
+  {
+    "id":"m6",
+    "name":"Pulseras de cristales Zircon",
+    "description":"Pulseras de cuentas facetadas, cristales y detalles decorativos.",
+    "stock":10,
+    "available":true,
+    "image":"/Productos/pulseras cristales Zircon.jpeg"
+  }
 ]
