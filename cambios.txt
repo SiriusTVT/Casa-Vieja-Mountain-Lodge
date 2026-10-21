@@ -8,8 +8,13 @@ LISTA DE CAMBIOS - CASA VIEJA MOUNTAIN LODGE
    - Se suavizó el degradado oscuro (overlay) para que la imagen se aprecie vibrante y nítida.
    - Se añadió sombra tipográfica suave al texto del hero para garantizar contraste y legibilidad óptimos.
 
-2. [COMPLETADO] Imagen sección "El bosque como escenario" (Naturaleza)
+2. [COMPLETADO] Imagen sección "La Chorrera al aire libre"
    - Se guardó la nueva foto con el nombre 'Chorrera_al_aire_libre.jpg' en '/Casa-Lodge-Img/'.
-   - Se actualizó la imagen en la sección de naturaleza de index.html.
+   - Se actualizó la imagen en la sección de la chorrera en index.html.
    - Se ajustó el posicionamiento ('object-position: center bottom') para que la chorrera de piedra, el agua y las asoleadoras se aprecien completas.
+
+3. [COMPLETADO] Reorganización de textos entre Chorrera y Bosque
+   - En la sección de la chorrera: se cambió el título a "La Chorrera al aire libre", se redactó una descripción acorde a la alberca, el agua viva y el descanso, y se retiró la mención de las especies.
+   - En la sección fotográfica ("La montaña también se cuenta en imágenes"): se asignó el título "El bosque como escenario", se incorporó el texto de biodiversidad, el contador de las 141 especies clasificadas y los accesos a Instagram y eBird.
+
 

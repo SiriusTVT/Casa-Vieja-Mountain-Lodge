@@ -96,12 +96,12 @@ figcaption { margin-top: 10px; color: var(--earth); font: 10px var(--sans); lett
 .split-copy { align-self: center; max-width: 610px; padding: clamp(55px, 9vw, 140px); }
 .split-copy p:not(.eyebrow):not(.large-copy) { max-width: 480px; color: var(--earth); font-size: 17px; }
 .dark-band .split-copy p:not(.eyebrow):not(.large-copy) { color: rgba(255,255,255,.7); }
-.stat-line, .nature-stat { display: flex; align-items: baseline; gap: 16px; margin-top: 36px; border-top: 1px solid var(--line); padding-top: 18px; }
+.stat-line, .nature-stat { display: flex; align-items: baseline; gap: 16px; margin-top: 32px; border-top: 1px solid var(--line); padding-top: 18px; }
 .stat-line strong, .nature-stat strong { color: var(--forest); font-size: 54px; font-weight: 400; line-height: 1; }
 .stat-line span, .nature-stat span { color: var(--earth); font: 700 10px var(--sans); letter-spacing: .17em; text-transform: uppercase; }
-.nature-stat { border-color: rgba(255,255,255,.25); }
-.nature-stat strong { color: var(--gold); }
-.nature-stat span { color: rgba(255,255,255,.7); }
+.dark-band .nature-stat { border-color: rgba(255,255,255,.25); }
+.dark-band .nature-stat strong { color: var(--gold); }
+.dark-band .nature-stat span { color: rgba(255,255,255,.7); }
 .text-link-light { display: inline-block; margin-top: 30px; color: var(--white); }
 .room-feature { display: grid; grid-template-columns: 1.12fr .88fr; max-width: 1220px; min-height: 560px; margin: auto; background: var(--white); }
 .room-image { min-height: 560px; overflow: hidden; }
