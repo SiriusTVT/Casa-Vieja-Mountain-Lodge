@@ -137,9 +137,14 @@ figcaption { margin-top: 10px; color: var(--earth); font: 10px var(--sans); lett
 .manual-review cite { color: var(--gold); font: 700 10px var(--sans); letter-spacing: .12em; text-transform: uppercase; }
 .quote-feature p { margin-bottom: 24px; color: var(--white); font-size: clamp(24px, 3.4vw, 48px); line-height: 1.12; }
 .quote-feature span { color: var(--gold); font: 700 10px var(--sans); letter-spacing: .17em; text-transform: uppercase; }
-.instagram-section { display: grid; grid-template-columns: .8fr 1.2fr; gap: clamp(40px, 8vw, 120px); align-items: center; }
-.instagram-copy { max-width: 510px; }
-.instagram-copy p:not(.eyebrow) { color: var(--earth); font-size: 17px; }
+.forest-section, .mountain-section, .instagram-section { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(40px, 8vw, 100px); align-items: center; }
+.forest-copy, .mountain-copy, .instagram-copy { max-width: 530px; }
+.forest-copy p:not(.eyebrow):not(.large-copy), .mountain-copy p:not(.eyebrow):not(.large-copy), .instagram-copy p:not(.eyebrow):not(.large-copy) { color: var(--earth); font-size: 17px; }
+.forest-image { margin: 0; overflow: hidden; border-radius: 4px; }
+.forest-image img { display: block; width: 100%; height: min(68vh, 600px); object-fit: cover; transition: transform .8s ease; }
+.forest-image:hover img { transform: scale(1.03); }
+.mountain-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: center; }
+.mountain-gallery img { width: 100%; height: 260px; object-fit: cover; border-radius: 3px; }
 .instagram-grid { display: grid; grid-template-columns: 1.1fr .8fr .8fr; gap: 12px; align-items: end; }
 .instagram-grid img { width: 100%; height: 270px; object-fit: cover; }
 .instagram-grid img:nth-child(2) { height: 350px; }
@@ -189,7 +194,7 @@ figcaption { margin-top: 10px; color: var(--earth); font: 10px var(--sans); lett
   .nav-menu.is-open { display: flex; } .nav-menu a { padding: 14px; border-bottom: 1px solid rgba(255,255,255,.1); } .nav-actions { margin: 8px 0 0; gap: 8px; } .nav-actions a { flex: 1; text-align: center; } .nav-menu .nav-cta { border: 1px solid var(--gold); text-align: center; }
   .hero-media { background-position: center bottom; }
   .hero-content { width: calc(100% - 40px); margin: 0 20px; padding-top: 70px; } h1 { font-size: clamp(51px, 17vw, 92px); } h1 em { margin-left: 10px; font-size: .42em; } .hero-lead { font-size: 20px; } .scroll-cue { display: none; }
-  .experience-intro, .day-story, .instagram-section, .contact-top { grid-template-columns: 1fr; } .contact-intro { position: static; } .intro-image img, .day-image img { height: 55vh; }
+  .experience-intro, .day-story, .forest-section, .mountain-section, .instagram-section, .contact-top { grid-template-columns: 1fr; } .contact-intro { position: static; } .intro-image img, .day-image img, .forest-image img { height: 55vh; }
   .experience-item, .experience-item-offset { grid-template-columns: 28px 1fr; padding-left: 0; } .experience-copy { grid-column: 2; } .experience-copy p { max-width: none; }
   .split-section { grid-template-columns: 1fr; min-height: 0; } .split-image, .split-image img, .room-image { min-height: 420px; height: 420px; } .nature-section .split-image { order: 0; } .room-feature { grid-template-columns: 1fr; } .room-copy { padding: 44px 25px 55px; }
   .editorial-gallery { grid-template-columns: 1fr 1fr; grid-auto-rows: 180px; } .gallery-large, .gallery-tall, .gallery-wide, .gallery-wide-last { grid-column: span 2; grid-row: span 2; } .gallery-tall { grid-row: span 3; } .gallery-small { grid-column: span 1; }
