@@ -112,6 +112,7 @@ figcaption { margin-top: 10px; color: var(--earth); font: 10px var(--sans); lett
 .room-copy h3 { margin: 26px 0 18px; color: var(--forest); font-size: clamp(31px, 4vw, 56px); font-weight: 400; line-height: 1; }
 .room-copy > p:not(.room-kicker) { color: var(--earth); font-size: 16px; }
 .nature-section .split-image { order: 2; }
+.nature-image img { object-position: center bottom; }
 .wellness-section { background: #fffaf2; }
 .editorial-gallery { display: grid; grid-template-columns: 1.2fr .8fr .8fr; grid-auto-rows: 220px; gap: 16px; max-width: 1250px; margin: 0 auto; }
 .editorial-gallery figure { position: relative; margin: 0; overflow: hidden; }
