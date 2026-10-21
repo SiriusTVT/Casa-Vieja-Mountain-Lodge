@@ -171,6 +171,15 @@ figcaption { margin-top: 10px; color: var(--earth); font: 10px var(--sans); lett
 .booking-form input, .booking-form textarea, .booking-form select { width: 100%; padding: 13px 14px; border: 1px solid rgba(38,53,43,.25); border-radius: 0; color: var(--ink); background: var(--cream); font: 14px var(--sans); }
 .booking-form input:focus, .booking-form textarea:focus, .booking-form select:focus { outline: 2px solid var(--gold); outline-offset: 2px; }
 .booking-form input:disabled { cursor: not-allowed; opacity: .55; background: #e8e1d5; }
+.addons-group { margin: 8px 0 6px; }
+.addons-label { display: block; margin-bottom: 8px; color: var(--forest); font: 700 10px var(--sans); letter-spacing: .14em; text-transform: uppercase; }
+.addons-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.addon-card { display: flex; align-items: flex-start; gap: 10px; padding: 11px 12px; background: var(--cream); border: 1px solid rgba(38,53,43,.22); cursor: pointer; transition: border-color .2s, background .2s; }
+.addon-card:hover { border-color: var(--gold); }
+.addon-card input[type="checkbox"] { width: 18px !important; height: 18px !important; margin-top: 2px !important; accent-color: var(--forest); cursor: pointer; flex-shrink: 0; }
+.addon-details { display: flex; flex-direction: column; gap: 2px; }
+.addon-details strong { font: 700 12px var(--sans); color: var(--forest); text-transform: none; letter-spacing: normal; }
+.addon-details small { font: 400 11px var(--sans); color: var(--earth); text-transform: none; letter-spacing: normal; }
 .date-group { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .form-note { margin: 0; color: var(--earth); font: 11px var(--sans); }
 .rate-output { display: flex; justify-content: space-between; gap: 20px; padding: 15px; background: var(--forest); color: var(--white); font: 13px var(--sans); }
@@ -203,6 +212,7 @@ figcaption { margin-top: 10px; color: var(--earth); font: 10px var(--sans); lett
   .editorial-gallery { grid-template-columns: 1fr 1fr; grid-auto-rows: 180px; } .gallery-large, .gallery-tall, .gallery-wide, .gallery-wide-last { grid-column: span 2; grid-row: span 2; } .gallery-tall { grid-row: span 3; } .gallery-small { grid-column: span 1; }
   .instagram-grid { grid-template-columns: 1fr 1fr; } .instagram-grid img, .instagram-grid img:nth-child(2), .instagram-grid img:nth-child(3) { height: 220px; } .instagram-grid img:first-child { grid-column: span 2; }
   .manual-reviews { grid-template-columns: 1fr; }
+  .addons-grid { grid-template-columns: 1fr; }
   .review-filters button { flex: 1 1 calc(50% - 9px); }
   .rate-strip { align-items: flex-start; } .rate-strip .button { margin-left: 0; width: 100%; } .contact-intro { position: static; } .date-group { grid-template-columns: 1fr; } .location-block { margin-top: 10px; } .footer { flex-direction: column; }
 }

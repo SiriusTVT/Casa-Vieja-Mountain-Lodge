@@ -27,6 +27,13 @@ LISTA DE CAMBIOS - CASA VIEJA MOUNTAIN LODGE
    - Se guardaron las 3 imágenes en '/Casa-Lodge-Img/': 'Montana_principal.jpg' (panorámica), 'Sendero_avistamiento.jpg' (caminantes en el bosque) y 'Flora_montana_niebla.jpg' (bromelias y bruma).
    - Se configuró la maquetación visual: la panorámica principal en la parte superior en ancho completo, y debajo en dos columnas las dos fotografías secundarias con pies de foto integrados.
 
+6. [COMPLETADO] Configuración de tarifa de Pasadía común y Adicionales de alimentación
+   - Se fijó el valor de Pasadía común (solo visita a la finca, senderos, río y chorrera) en $35.000 por persona.
+   - Se transformaron los alimentos en adicionales opcionales para cualquier servicio: Desayuno ($18.000), Almuerzo ($38.000) y Refrigerio ($10.000) por persona.
+   - Se crearon tarjetas de selección de adicionales en el formulario de cotización, actualizando el total en vivo según el número de huéspedes/visitantes.
+   - Se actualizó el mensaje de WhatsApp y el guardado en base de datos para detallar el servicio base y los adicionales escogidos.
+
+
 
 
 
