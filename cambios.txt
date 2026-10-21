@@ -1,0 +1,10 @@
+LISTA DE CAMBIOS - CASA VIEJA MOUNTAIN LODGE
+=================================================
+
+1. [COMPLETADO] Fondo de la página principal (Hero)
+   - Se copió y configuró la fotografía horizontal de Casa Vieja al atardecer como fondo principal ('/Casa-Lodge-Img/fondo-principal.jpg').
+   - Se ajustó el escalado ('cover', 'center center', y en móviles 'center bottom') para encuadrar la casa, el árbol y el pino completos.
+   - Se optimizó la animación de zoom (de 1.03 a 1) para evitar recortes excesivos en los bordes.
+   - Se suavizó el degradado oscuro (overlay) para que la imagen se aprecie vibrante y nítida.
+   - Se añadió sombra tipográfica suave al texto del hero para garantizar contraste y legibilidad óptimos.
+

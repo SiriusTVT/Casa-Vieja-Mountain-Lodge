@@ -22,8 +22,8 @@ img { max-width: 100%; }
 
 .site-header { min-height: 100svh; position: relative; overflow: hidden; display: flex; align-items: center; color: var(--white); background: var(--deep); }
 .hero-media, .hero-media:after { position: absolute; inset: 0; }
-.hero-media { background: url('/Casa-Lodge-Img/imagen_24.jpg') center/cover; transform: scale(1.02); animation: hero-zoom 16s ease-out both; }
-.hero-media:after { content: ''; background: linear-gradient(90deg, rgba(23,35,28,.94), rgba(23,35,28,.72) 48%, rgba(23,35,28,.42)); }
+.hero-media { background: url('/Casa-Lodge-Img/fondo-principal.jpg') center center / cover no-repeat; transform: scale(1.01); animation: hero-zoom 16s ease-out both; }
+.hero-media:after { content: ''; background: linear-gradient(90deg, rgba(23,35,28,.65) 0%, rgba(23,35,28,.35) 50%, rgba(23,35,28,.15) 100%), linear-gradient(180deg, rgba(23,35,28,.35) 0%, transparent 25%, rgba(23,35,28,.4) 100%); }
 .nav { position: absolute; top: 0; left: 0; right: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: 28px; padding: 22px clamp(20px, 5vw, 76px); border-bottom: 1px solid rgba(255,255,255,.25); transition: background .35s ease, padding .35s ease; }
 .nav.is-scrolled { position: fixed; padding-top: 14px; padding-bottom: 14px; background: rgba(23,35,28,.92); backdrop-filter: blur(14px); }
 .brand { display: flex; align-items: center; gap: 12px; color: var(--white); font: 700 15px var(--sans); letter-spacing: .08em; text-decoration: none; text-transform: uppercase; white-space: nowrap; }
@@ -38,7 +38,7 @@ img { max-width: 100%; }
 .nav-cta { border: 1px solid var(--gold); padding: 10px 14px; color: var(--gold); }
 .menu-toggle { display: none; border: 0; background: transparent; color: var(--white); padding: 8px; cursor: pointer; }
 .menu-toggle span { display: block; width: 27px; height: 1px; margin: 7px 0; background: currentColor; }
-.hero-content { position: relative; z-index: 2; width: min(920px, 90%); margin: 0 clamp(20px, 10vw, 150px); padding-top: 7vh; }
+.hero-content { position: relative; z-index: 2; width: min(920px, 90%); margin: 0 clamp(20px, 10vw, 150px); padding-top: 7vh; text-shadow: 0 2px 14px rgba(0, 0, 0, .45); }
 .eyebrow { margin: 0 0 18px; color: var(--gold); font: 700 10px var(--sans); letter-spacing: .28em; text-transform: uppercase; }
 .eyebrow-dark { color: var(--earth); }
 h1, h2, h3, p { margin-top: 0; }
@@ -179,13 +179,14 @@ figcaption { margin-top: 10px; color: var(--earth); font: 10px var(--sans); lett
 .reveal { opacity: 0; transform: translateY(24px); transition: opacity .8s ease, transform .8s cubic-bezier(.2,.8,.2,1); }
 .reveal.is-visible { opacity: 1; transform: none; }
 .reveal-delay { transition-delay: .12s; }
-@keyframes hero-zoom { from { transform: scale(1.08); } to { transform: scale(1.02); } }
+@keyframes hero-zoom { from { transform: scale(1.03); } to { transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { *, *:before, *:after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } .reveal { opacity: 1; transform: none; } }
 @media (max-width: 900px) { .nav-menu { gap: 13px; font-size: 9px; } .experience-item { grid-template-columns: 35px minmax(190px, 1fr) minmax(200px, .8fr); } .split-copy { padding: 60px 7vw; } }
 @media (max-width: 700px) {
   .nav { padding: 16px 20px; } .menu-toggle { display: block; }
   .nav-menu { position: absolute; top: 80px; right: 14px; left: 14px; display: none; align-items: stretch; flex-direction: column; gap: 0; padding: 10px; background: rgba(23,35,28,.98); border: 1px solid rgba(201,168,106,.4); }
   .nav-menu.is-open { display: flex; } .nav-menu a { padding: 14px; border-bottom: 1px solid rgba(255,255,255,.1); } .nav-actions { margin: 8px 0 0; gap: 8px; } .nav-actions a { flex: 1; text-align: center; } .nav-menu .nav-cta { border: 1px solid var(--gold); text-align: center; }
+  .hero-media { background-position: center bottom; }
   .hero-content { width: calc(100% - 40px); margin: 0 20px; padding-top: 70px; } h1 { font-size: clamp(51px, 17vw, 92px); } h1 em { margin-left: 10px; font-size: .42em; } .hero-lead { font-size: 20px; } .scroll-cue { display: none; }
   .experience-intro, .day-story, .instagram-section, .contact-top { grid-template-columns: 1fr; } .contact-intro { position: static; } .intro-image img, .day-image img { height: 55vh; }
   .experience-item, .experience-item-offset { grid-template-columns: 28px 1fr; padding-left: 0; } .experience-copy { grid-column: 2; } .experience-copy p { max-width: none; }
