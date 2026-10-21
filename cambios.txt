@@ -21,7 +21,12 @@ LISTA DE CAMBIOS - CASA VIEJA MOUNTAIN LODGE
    - Se guardó la nueva fotografía vertical como 'Bosque_del_Tachuelo.jpg' en '/Casa-Lodge-Img/'.
    - Se reemplazó el grid de tres imágenes por esta fotografía única del Bosque del Tachuelo.
    - Se añadió el subtítulo "Bosque del Tachuelo" a la sección y pie de foto.
-   - Se creó una nueva sección debajo ('#montana' / "La montaña también se cuenta en imágenes") trasladando allí el bloque de las 141 especies de aves clasificadas, enlaces a eBird/Instagram y dejando listo el contenedor para las imágenes.
+   - Se creó una nueva sección debajo ('#montana' / "La montaña también se cuenta en imágenes") trasladando allí el bloque de las 141 especies de aves clasificadas y enlaces a eBird/Instagram.
+
+5. [COMPLETADO] Galería organizada para la sección de la Montaña
+   - Se guardaron las 3 imágenes en '/Casa-Lodge-Img/': 'Montana_principal.jpg' (panorámica), 'Sendero_avistamiento.jpg' (caminantes en el bosque) y 'Flora_montana_niebla.jpg' (bromelias y bruma).
+   - Se configuró la maquetación visual: la panorámica principal en la parte superior en ancho completo, y debajo en dos columnas las dos fotografías secundarias con pies de foto integrados.
+
 
 
 
