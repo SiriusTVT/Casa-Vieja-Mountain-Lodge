@@ -187,8 +187,10 @@ figcaption { margin-top: 10px; color: var(--earth); font: 10px var(--sans); lett
 .booking-form button { margin-top: 16px; cursor: pointer; }
 .location-block { max-width: 840px; width: 100%; margin: clamp(55px, 8vw, 100px) auto 0; position: relative; clear: both; }
 .location-block iframe { display: block; width: 100%; height: 330px; border: 0; filter: saturate(.7) contrast(.95); }
-.location-block p { margin: 16px 0 4px; color: var(--forest); font: 700 12px var(--sans); }
-.location-block a { color: var(--earth); font: 700 11px var(--sans); text-decoration: none; }
+.location-block p { margin: 16px 0 8px; color: var(--forest); font: 700 12px var(--sans); }
+.location-links { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 6px; }
+.location-links a { color: var(--earth); font: 700 11px var(--sans); text-decoration: none; transition: color .2s; }
+.location-links a:hover { color: var(--forest); }
 .whatsapp-float { position: fixed; right: 22px; bottom: 22px; z-index: 15; display: grid; place-items: center; width: 52px; height: 52px; border: 1px solid var(--gold); border-radius: 50%; background: var(--forest); color: var(--gold); font: 700 11px var(--sans); text-decoration: none; box-shadow: 0 12px 28px rgba(0,0,0,.2); }
 .footer { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; padding: 30px clamp(20px, 8vw, 130px); background: var(--deep); color: rgba(255,255,255,.7); font: 11px var(--sans); letter-spacing: .08em; text-transform: uppercase; }
 .footer div { display: flex; gap: 18px; }
