@@ -33,6 +33,10 @@ LISTA DE CAMBIOS - CASA VIEJA MOUNTAIN LODGE
    - Se crearon tarjetas de selección de adicionales en el formulario de cotización, actualizando el total en vivo según el número de huéspedes/visitantes.
    - Se actualizó el mensaje de WhatsApp y el guardado en base de datos para detallar el servicio base y los adicionales escogidos.
 
+7. [COMPLETADO] Jerarquía del título principal (Hero)
+   - En index.html se ajustó el <h1> del hero sin cambiar el orden de lectura: ahora "Casa Vieja" va en <em> (título pequeño) y "Mountain Lodge" en <span> (título grande), manteniendo el orden "Casa Vieja Mountain Lodge".
+   - El CSS ya diferenciaba h1 span (tamaño completo) de h1 em (0.48em, sangrado), por lo que "Mountain Lodge" es ahora el título más grande de la página principal en lugar de "Casa Vieja".s.
+
 
 
 
