@@ -35,7 +35,63 @@ LISTA DE CAMBIOS - CASA VIEJA MOUNTAIN LODGE
 
 7. [COMPLETADO] Jerarquía del título principal (Hero)
    - En index.html se ajustó el <h1> del hero sin cambiar el orden de lectura: ahora "Casa Vieja" va en <em> (título pequeño) y "Mountain Lodge" en <span> (título grande), manteniendo el orden "Casa Vieja Mountain Lodge".
-   - El CSS ya diferenciaba h1 span (tamaño completo) de h1 em (0.48em, sangrado), por lo que "Mountain Lodge" es ahora el título más grande de la página principal en lugar de "Casa Vieja".s.
+   - El CSS ya diferenciaba h1 span (tamaño completo) de h1 em (0.48em, sangrado), por lo que "Mountain Lodge" es ahora el título más grande de la página principal en lugar de "Casa Vieja".
+
+8. [COMPLETADO] Sistema de diseño global - Paleta, contraste y jerarquía visual
+   - Paleta de colores definida en :root de todos los CSS:
+     * --bg-light: #f6f1e8 (fondo secciones claras)
+     * --text-heading: #4A0A17 (vinotinto profundo para h1,h2,h3 sobre fondos claros)
+     * --text-body: #3A2E2B (marrón cálido para párrafos sobre fondos claros)
+     * --bg-dark: #7D041D (fondo vinotinto institucional, header, nav)
+     * --accent-dark: #86041D (relleno capa casa, botones primarios)
+     * --text-light: #FFFFFF (texto sobre fondos oscuros)
+     * --accent-light: #F4E6C3 (dorado suave sobre fondos oscuros)
+     * --input-bg: #FFFFFF (fondo inputs)
+     * --input-border: #E5E7EB (borde inputs)
+     * --input-text: #1A1A1A (texto dentro de inputs)
+     * --input-placeholder: #71717A (placeholders)
+     * --label-color: #4A0A17 (etiquetas de formulario)
+     * --btn-primary-bg: #86041D (botón primario)
+     * --btn-primary-text: #FFFFFF (texto botón primario)
+     * --btn-primary-hover: #5E0315 (hover botón primario)
+     * --btn-secondary-border: #4A0A17 (borde botón secundario)
+   - Aplicado a: public/style.css, public/admin.css, public/pago.css, public/admin.html (estilos inline)
+   - Jerarquía tipográfica: títulos font-weight 600, lectura line-height 1.6
+   - Formularios: inputs fondo blanco #FFFFFF, bordes #E5E7EB, texto #1A1A1A, labels #4A0A17 font-weight 600
+   - Botones: primario fondo #86041D texto #FFFFFF hover #5E0315; secundario borde #4A0A17 fondo transparente
+   - Archivos afectados: style.css, admin.css, pago.css, admin.html
+   - .form-note color actualizado a var(--text-body)
+
+9. [COMPLETADO] Enfoque indirecto: lenguaje de cotización en lugar de reserva (sin letrero directo)
+   - Se eliminó el disclaimer directo ("⚠️ Solicitud de cotización sin compromiso — esto no es una reserva").
+   - Se cambiaron todas las palabras de "Reservar" → "Cotizar" en la interfaz visible:
+     * index.html: nav CTA "Reservar" → "Cotizar"; hero "Reservar" → "Cotizar"; bienestar "Reservar bienestar" → "Cotizar bienestar"; tarifas "Ver opciones y reservar" → "Ver opciones y cotizar"; final CTA "Reservar estadía" → "Cotizar estadía"; id de sección "reserva" → "cotiza".
+     * catalogo.html: "Reservar / Consultar" → "Cotizar / Consultar".
+   - Se cambió el ID y clase del formulario: booking-form → cotiza-form (index.html, style.css, JS inline de index.html).
+   - Se cambió texto en pago.js: "para validar la reserva" → "para validar tu solicitud".
+   - El mensaje ahora se comunica indirectamente mediante el cambio de vocabulario en todos los botones y enlaces de acción.
+   - Paleta de colores definida en :root de todos los CSS:
+     * --bg-light: #f6f1e8 (fondo secciones claras)
+     * --text-heading: #4A0A17 (vinotinto profundo para h1,h2,h3 sobre fondos claros)
+     * --text-body: #3A2E2B (marrón cálido para párrafos sobre fondos claros)
+     * --bg-dark: #7D041D (fondo vinotinto institucional, header, nav)
+     * --accent-dark: #86041D (relleno capa casa, botones primarios)
+     * --text-light: #FFFFFF (texto sobre fondos oscuros)
+     * --accent-light: #F4E6C3 (dorado suave sobre fondos oscuros)
+     * --input-bg: #FFFFFF (fondo inputs)
+     * --input-border: #E5E7EB (borde inputs)
+     * --input-text: #1A1A1A (texto dentro de inputs)
+     * --input-placeholder: #71717A (placeholders)
+     * --label-color: #4A0A17 (etiquetas de formulario)
+     * --btn-primary-bg: #86041D (botón primario)
+     * --btn-primary-text: #FFFFFF (texto botón primario)
+     * --btn-primary-hover: #5E0315 (hover botón primario)
+     * --btn-secondary-border: #4A0A17 (borde botón secundario)
+   - Aplicado a: public/style.css, public/admin.css, public/pago.css, public/admin.html (estilos inline)
+   - Jerarquía tipográfica: títulos font-weight 600, lectura line-height 1.6
+   - Formularios: inputs fondo blanco #FFFFFF, bordes #E5E7EB, texto #1A1A1A, labels #4A0A17 font-weight 600
+   - Botones: primario fondo #86041D texto #FFFFFF hover #5E0315; secundario borde #4A0A17 fondo transparente
+   - Archivos afectados: style.css, admin.css, pago.css, admin.htmls.
 
 
 
