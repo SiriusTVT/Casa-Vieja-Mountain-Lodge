@@ -332,6 +332,111 @@ async function handleAdminQuotes(request, response) {
   catch { return sendJson(response, 503, { ok: false, error: 'No se pudieron cargar las cotizaciones.' }); }
 }
 
+async function handleAdminQuotesReport(request, response) {
+  if (!requireAdmin(request, response)) return;
+  try {
+    const urlObj = new URL(request.url, `http://${request.headers.host || 'localhost'}`);
+    const yearParam = urlObj.searchParams.get('year');
+    const monthParam = urlObj.searchParams.get('month'); // 1-12
+    const statusParam = urlObj.searchParams.get('status'); // all | confirmado | pendiente | cancelado | etc.
+    const format = urlObj.searchParams.get('format') || 'csv';
+
+    const now = new Date();
+    const year = yearParam ? parseInt(yearParam, 10) : now.getFullYear();
+    const month = monthParam ? parseInt(monthParam, 10) : (now.getMonth() + 1);
+
+    if (isNaN(year) || isNaN(month) || month < 1 || month > 12) {
+      return sendJson(response, 400, { ok: false, error: 'Año o mes inválido.' });
+    }
+
+    const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0));
+    const endDate = new Date(Date.UTC(year, month, 1, 0, 0, 0, 0));
+
+    const query = {
+      createdAt: { $gte: startDate, $lt: endDate }
+    };
+
+    if (statusParam && statusParam !== 'all') {
+      query.estado = statusParam;
+    }
+
+    const database = await getDatabase();
+    const quotes = await database.collection('cotizaciones')
+      .find(query)
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    const monthNames = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+    const monthName = monthNames[month - 1];
+
+    if (format === 'json') {
+      return sendJson(response, 200, {
+        ok: true,
+        year,
+        month,
+        monthName,
+        total: quotes.length,
+        quotes: quotes.map((q) => ({ ...q, id: String(q._id), _id: undefined }))
+      });
+    }
+
+    // CSV format
+    const escapeCsv = (val) => {
+      if (val === null || val === undefined) return '""';
+      const str = String(val).replace(/"/g, '""');
+      return `"${str}"`;
+    };
+
+    const headers = [
+      'ID',
+      'Fecha Creación (UTC)',
+      'Nombre',
+      'Email',
+      'Teléfono',
+      'Experiencia',
+      'Llegada',
+      'Salida',
+      'Huéspedes',
+      'Valor Cotización',
+      'Estado Cotización',
+      'Estado Pago',
+      'Comentarios'
+    ];
+
+    const rows = quotes.map((q) => [
+      escapeCsv(String(q._id)),
+      escapeCsv(q.createdAt ? new Date(q.createdAt).toISOString() : ''),
+      escapeCsv(q.nombre || ''),
+      escapeCsv(q.email || ''),
+      escapeCsv(q.telefono || ''),
+      escapeCsv(q.experienciaNombre || q.experiencia || ''),
+      escapeCsv(q.llegada || ''),
+      escapeCsv(q.salida || ''),
+      escapeCsv(q.huespedes || ''),
+      escapeCsv(q.cotizacion || ''),
+      escapeCsv(q.estado || ''),
+      escapeCsv(q.payment?.status || 'sin link'),
+      escapeCsv(q.comentarios || '')
+    ].join(','));
+
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+    const filename = `resumen-cotizaciones-${year}-${String(month).padStart(2, '0')}.csv`;
+
+    response.writeHead(200, {
+      'Content-Type': 'text/csv; charset=utf-8',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Cache-Control': 'no-store'
+    });
+    return response.end(csvContent);
+  } catch (error) {
+    console.error('Error generando resumen mensual:', error.message);
+    return sendJson(response, 503, { ok: false, error: 'No se pudo generar el resumen.' });
+  }
+}
+
 async function handlePaymentLink(request, response, quoteId) {
   if (!requireAdmin(request, response)) return;
   if (!ObjectId.isValid(quoteId)) return sendJson(response, 400, { ok: false, error: 'Cotización no válida.' });
@@ -428,6 +533,7 @@ const server = http.createServer((request, response) => {
   if (requestPath === '/api/admin/logout' && request.method === 'POST') { sessions.delete(cookies(request).admin_session); return sendJson(response, 200, { ok: true }, { 'Set-Cookie': 'admin_session=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0' }); }
   if (requestPath === '/api/admin/me' && request.method === 'GET') { const session = requireAdmin(request, response); return session ? sendJson(response, 200, { ok: true, username: session.username }) : undefined; }
   if (requestPath === '/api/admin/cotizaciones' && request.method === 'GET') return void handleAdminQuotes(request, response);
+  if (requestPath === '/api/admin/cotizaciones/resumen' && request.method === 'GET') return void handleAdminQuotesReport(request, response);
   if (requestPath === '/api/admin/products' && request.method === 'GET') return void handleAdminProducts(request, response);
   if (requestPath === '/api/admin/products' && request.method === 'POST') return void handleAdminProductCreate(request, response);
   if (requestPath === '/api/admin/images' && request.method === 'POST') return void handleAdminImageUpload(request, response);

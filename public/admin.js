@@ -270,7 +270,61 @@ function renderQuotes(quotes) {
   }));
 }
 
+function initReportForm() {
+  const yearSelect = document.getElementById('report-year');
+  const monthSelect = document.getElementById('report-month');
+  const form = document.getElementById('quotes-report-form');
+  const statusMsg = document.getElementById('report-status-msg');
+  if (!yearSelect || !form) return;
+
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth() + 1;
+  yearSelect.replaceChildren();
+  for (let y = currentYear; y >= currentYear - 5; y--) {
+    const opt = document.createElement('option');
+    opt.value = String(y);
+    opt.textContent = String(y);
+    yearSelect.append(opt);
+  }
+  monthSelect.value = String(currentMonth);
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    statusMsg.textContent = 'Generando resumen...';
+    const month = monthSelect.value;
+    const year = yearSelect.value;
+    const status = document.getElementById('report-status').value;
+    const downloadBtn = document.getElementById('download-report-btn');
+    downloadBtn.disabled = true;
+
+    try {
+      const query = new URLSearchParams({ year, month, status, format: 'csv' });
+      const res = await fetch(`/api/admin/cotizaciones/resumen?${query.toString()}`);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'No se pudo descargar el resumen.');
+      }
+      const blob = await res.blob();
+      const filename = `resumen-cotizaciones-${year}-${String(month).padStart(2, '0')}.csv`;
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      statusMsg.textContent = `Resumen descargado exitosamente: ${filename}`;
+    } catch (err) {
+      statusMsg.textContent = err.message;
+    } finally {
+      downloadBtn.disabled = false;
+    }
+  });
+}
+
 async function loadDashboard(username) {
+  initReportForm();
   const data = await request('/api/admin/cotizaciones');
 document.getElementById('refresh-quotes').addEventListener('click', async () => {
   const button = document.getElementById('refresh-quotes');

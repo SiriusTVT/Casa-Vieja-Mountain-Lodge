@@ -26,6 +26,50 @@
          <header class="dashboard-header"><div><p class="eyebrow">Panel privado</p><h1>Cotizaciones</h1></div><div class="dashboard-actions"><button id="refresh-quotes" type="button">Actualizar</button><button id="logout">Cerrar sesión</button></div></header>
       <div class="admin-tabs"><button type="button" class="admin-tab is-active" data-admin-tab="quotes">Cotizaciones</button><button type="button" class="admin-tab" data-admin-tab="products">Productos</button></div>
       <section class="admin-panel" id="quotes-panel">
+        <div class="quotes-report-card">
+          <div class="quotes-report-header">
+            <div>
+              <h3>Resumen descargable de cotizaciones</h3>
+              <p>Descarga el reporte mensual en formato Excel / CSV de todas las cotizaciones del mes y año seleccionados, independiente de su estado (confirmadas, pendientes, canceladas o pago reportado).</p>
+            </div>
+          </div>
+          <form class="quotes-report-form" id="quotes-report-form">
+            <div class="report-fields">
+              <label for="report-month">Mes
+                <select id="report-month" name="month">
+                  <option value="1">Enero</option>
+                  <option value="2">Febrero</option>
+                  <option value="3">Marzo</option>
+                  <option value="4">Abril</option>
+                  <option value="5">Mayo</option>
+                  <option value="6">Junio</option>
+                  <option value="7">Julio</option>
+                  <option value="8">Agosto</option>
+                  <option value="9">Septiembre</option>
+                  <option value="10">Octubre</option>
+                  <option value="11">Noviembre</option>
+                  <option value="12">Diciembre</option>
+                </select>
+              </label>
+              <label for="report-year">Año
+                <select id="report-year" name="year"></select>
+              </label>
+              <label for="report-status">Estado
+                <select id="report-status" name="status">
+                  <option value="all">Todos los estados (incluye confirmadas)</option>
+                  <option value="confirmado">Solo confirmadas</option>
+                  <option value="pendiente">Solo pendientes</option>
+                  <option value="pago_reportado">Solo pago reportado</option>
+                  <option value="cancelado">Solo canceladas</option>
+                </select>
+              </label>
+              <div class="report-actions">
+                <button type="submit" id="download-report-btn">Descargar Resumen (CSV)</button>
+              </div>
+            </div>
+            <p class="status" id="report-status-msg" role="status"></p>
+          </form>
+        </div>
         <div class="dashboard-meta" id="dashboard-meta"></div>
         <div class="quotes" id="quotes"></div>
       </section>
