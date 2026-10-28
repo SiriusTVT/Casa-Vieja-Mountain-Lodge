@@ -125,7 +125,10 @@
     const loader = document.getElementById('cms-preview-loading');
     if (!iframe || !cmsState) return;
 
-    if (loader) loader.hidden = false;
+    // Solo mostrar el loader de pantalla completa si es la primera carga inicial del iframe
+    const isInitialLoad = !iframe.srcdoc;
+    if (isInitialLoad && loader) loader.hidden = false;
+
     try {
       const res = await fetch('/api/admin/cms/preview-render', {
         method: 'POST',
@@ -134,13 +137,21 @@
       });
       if (!res.ok) throw new Error('Error al renderizar vista previa.');
       const html = await res.text();
+
+      // Al asignar srcdoc, el navegador refresca el contenido
       iframe.srcdoc = html;
+
+      // Ocultar inmediatamente el cartel invasivo una vez procesado
+      if (loader) loader.hidden = true;
+
       iframe.onload = () => {
         if (loader) loader.hidden = true;
-        // Notify iframe about active mode and selected section
-        iframe.contentWindow.postMessage({ type: 'cms:set_mode', mode: previewMode }, '*');
-        if (selectedSectionId) {
-          iframe.contentWindow.postMessage({ type: 'cms:select_section', sectionId: selectedSectionId }, '*');
+        // Notificar al iframe sobre el modo activo y sección seleccionada
+        if (iframe.contentWindow) {
+          iframe.contentWindow.postMessage({ type: 'cms:set_mode', mode: previewMode }, '*');
+          if (selectedSectionId) {
+            iframe.contentWindow.postMessage({ type: 'cms:select_section', sectionId: selectedSectionId }, '*');
+          }
         }
       };
     } catch (e) {
