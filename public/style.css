@@ -127,7 +127,7 @@ figcaption { margin-top: 10px; color: var(--earth); font: 10px var(--sans); lett
 .editorial-gallery figure { position: relative; margin: 0; overflow: hidden; }
 .editorial-gallery figure img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .7s ease, filter .7s ease; }
 .editorial-gallery figure:hover img { transform: scale(1.05); filter: saturate(1.08); }
-.editorial-gallery figcaption { position: absolute; right: 14px; bottom: 10px; left: 14px; margin: 0; color: var(--white); text-shadow: 0 1px 10px rgba(0,0,0,.6); }
+.editorial-gallery figcaption { position: absolute; right: 0; bottom: 0; left: 0; margin: 0; padding: 26px 16px 12px; color: #FFFFFF !important; background: linear-gradient(to top, rgba(10, 15, 12, 0.92) 0%, rgba(10, 15, 12, 0.55) 65%, transparent 100%); font-weight: 600; font-size: 13px; letter-spacing: .03em; text-transform: none; text-shadow: 0 1px 4px rgba(0,0,0,.8); pointer-events: none; }
 .gallery-large { grid-row: span 2; }
 .gallery-tall { grid-row: span 3; }
 .gallery-wide, .gallery-wide-last { grid-column: span 2; }
@@ -144,6 +144,11 @@ figcaption { margin-top: 10px; color: var(--earth); font: 10px var(--sans); lett
 .manual-review-stars { margin-bottom: 15px; color: var(--gold); font: 14px var(--sans); letter-spacing: .12em; }
 .manual-review blockquote { margin: 0 0 22px; color: rgba(236,224,187,.86); font-size: 18px; line-height: 1.45; }
 .manual-review cite { color: var(--accent-light); font: 700 10px var(--sans); letter-spacing: .12em; text-transform: uppercase; }
+.testimonials-title { color: var(--accent-light) !important; font-style: italic; font-weight: 400; letter-spacing: -.02em; line-height: 1.15; }
+.reviews-cta-block { max-width: 930px; margin: 40px auto 10px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.reviews-cta-prompt { margin: 0; color: var(--accent-light); font-size: clamp(18px, 2.2vw, 24px); font-style: italic; font-family: var(--serif); line-height: 1.35; letter-spacing: .01em; }
+.reviews-cta-btn { min-width: 260px; font-weight: 700; border-color: var(--accent-light); }
+.reviews-cta-btn:hover { background: var(--accent-light); color: var(--text-heading); }
 .quote-feature p { margin-bottom: 24px; color: var(--text-light); font-size: clamp(24px, 3.4vw, 48px); line-height: 1.12; }
 .quote-feature span { color: var(--gold); font: 700 10px var(--sans); letter-spacing: .17em; text-transform: uppercase; }
 .forest-section, .mountain-section, .instagram-section { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(40px, 8vw, 100px); align-items: center; }
@@ -158,8 +163,8 @@ figcaption { margin-top: 10px; color: var(--earth); font: 10px var(--sans); lett
 .mountain-lead-img:hover img { transform: scale(1.025); }
 .mountain-sub-imgs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .mountain-sub-imgs figure { position: relative; margin: 0; border-radius: 4px; overflow: hidden; }
-.mountain-sub-imgs img { display: block; width: 100%; height: 200px; object-fit: cover; transition: transform .7s ease; }
-.mountain-sub-imgs figure:hover img { transform: scale(1.035); }
+.mountain-sub-imgs img, .mountain-sub-imgs video { display: block; width: 100%; height: 200px; object-fit: cover; transition: transform .7s ease; }
+.mountain-sub-imgs figure:hover img, .mountain-sub-imgs figure:hover video { transform: scale(1.035); }
 .mountain-sub-imgs figcaption { position: absolute; bottom: 0; left: 0; right: 0; padding: 7px 12px; background: linear-gradient(transparent, rgba(23,35,28,.82)); color: var(--white); font: 700 10px var(--sans); letter-spacing: .08em; text-transform: uppercase; margin: 0; }
 .rate-strip { display: flex; align-items: center; gap: clamp(18px, 5vw, 70px); flex-wrap: wrap; max-width: 1220px; margin: auto; padding: 28px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .rate-strip div { min-width: 150px; }
