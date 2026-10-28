@@ -980,42 +980,136 @@ function renderCmsPage(cmsData, options = {}) {
       navMenu.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => { navMenu.classList.remove('is-open'); menuToggle.setAttribute('aria-expanded', 'false'); }));
     }
     document.querySelectorAll('a[href^="#"]').forEach((link) => link.addEventListener('click', (event) => { const target = document.querySelector(link.getAttribute('href')); if (!target) return; event.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.history.replaceState(null, '', window.location.pathname + window.location.search); }));
+    function getNights() {
+      if (!arrival || !departure || !arrival.value || !departure.value || (rateSelect && rateSelect.value !== 'alojamiento')) return 1;
+      const d1 = new Date(arrival.value + 'T12:00:00');
+      const d2 = new Date(departure.value + 'T12:00:00');
+      const diffTime = d2 - d1;
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+      return Math.max(1, diffDays);
+    }
     function formatCurrency(value) { return '$' + value.toLocaleString('es-CO'); }
     function getRate() {
       if (!guestsInput || !rateSelect) return ['Experiencia', '$0', 0, []];
-      const guests = Math.max(1, Number(guestsInput.value) || 1); const type = rateSelect.value; let baseCost = 0; let baseLabel = rateOptions[type] || 'Experiencia';
-      if (type === 'alojamiento') { if (guests === 1) { baseCost = 130000; baseLabel = 'Alojamiento · 1 huésped'; } else if (guests === 2) { baseCost = 200000; baseLabel = 'Alojamiento · 2 huéspedes'; } else if (guests <= 4) { baseCost = 380000; baseLabel = 'Alojamiento · 3 a 4 huéspedes'; } else if (guests <= 9) { baseCost = 700000; baseLabel = 'Alojamiento · 5 a 9 huéspedes'; } else { return ['Alojamiento', 'Máximo 9 huéspedes', 0, []]; } }
-      else if (type === 'pasadia') { baseCost = 35000 * guests; baseLabel = 'Pasadía común · ' + guests + (guests === 1 ? ' persona' : ' personas'); }
-      else if (type === 'fotografia') { baseCost = 35000 * guests; baseLabel = 'Fotografía de naturaleza · ' + guests + (guests === 1 ? ' persona' : ' personas'); }
-      else if (type === 'bienestar') { baseCost = 80000 * guests; baseLabel = 'Bienestar (desde $80.000) · ' + guests + (guests === 1 ? ' persona' : ' personas'); }
-      const addons = []; let addonsCost = 0;
-      if (addonDesayuno && addonDesayuno.checked) { const cost = 18000 * guests; addonsCost += cost; addons.push('Desayuno (' + formatCurrency(cost) + ')'); }
-      if (addonAlmuerzo && addonAlmuerzo.checked) { const cost = 38000 * guests; addonsCost += cost; addons.push('Almuerzo (' + formatCurrency(cost) + ')'); }
-      if (addonRefrigerio && addonRefrigerio.checked) { const cost = 10000 * guests; addonsCost += cost; addons.push('Refrigerio (' + formatCurrency(cost) + ')'); }
-      const total = baseCost + addonsCost; const title = addons.length ? baseLabel + ' + ' + addons.join(' + ') : baseLabel; return [title, formatCurrency(total), total, addons];
+      const guests = Math.max(1, Number(guestsInput.value) || 1);
+      const type = rateSelect.value;
+      let baseCost = 0;
+      let baseLabel = rateOptions[type] || 'Experiencia';
+      const nights = getNights();
+
+      if (type === 'alojamiento') {
+        let nightRate = 0;
+        let guestsLabel = '';
+        if (guests === 1) {
+          nightRate = 130000;
+          guestsLabel = '1 huésped';
+        } else if (guests === 2) {
+          nightRate = 200000;
+          guestsLabel = '2 huéspedes';
+        } else if (guests <= 4) {
+          nightRate = 380000;
+          guestsLabel = '3 a 4 huéspedes';
+        } else if (guests <= 9) {
+          nightRate = 700000;
+          guestsLabel = '5 a 9 huéspedes';
+        } else {
+          return ['Alojamiento', 'Máximo 9 huéspedes', 0, []];
+        }
+        baseCost = nightRate * nights;
+        const nightsText = nights === 1 ? '1 noche' : (nights + ' noches');
+        baseLabel = 'Alojamiento (' + guestsLabel + ' · ' + nightsText + ')';
+      } else if (type === 'pasadia') {
+        baseCost = 35000 * guests;
+        baseLabel = 'Pasadía común · ' + guests + (guests === 1 ? ' persona' : ' personas');
+      } else if (type === 'fotografia') {
+        baseCost = 35000 * guests;
+        baseLabel = 'Fotografía de naturaleza · ' + guests + (guests === 1 ? ' persona' : ' personas');
+      } else if (type === 'bienestar') {
+        baseCost = 80000 * guests;
+        baseLabel = 'Bienestar (desde $80.000) · ' + guests + (guests === 1 ? ' persona' : ' personas');
+      }
+
+      const addons = [];
+      let addonsCost = 0;
+      const multiplier = type === 'alojamiento' ? guests * nights : guests;
+      if (addonDesayuno && addonDesayuno.checked) {
+        const cost = 18000 * multiplier;
+        addonsCost += cost;
+        addons.push('Desayuno (' + formatCurrency(cost) + ')');
+      }
+      if (addonAlmuerzo && addonAlmuerzo.checked) {
+        const cost = 38000 * multiplier;
+        addonsCost += cost;
+        addons.push('Almuerzo (' + formatCurrency(cost) + ')');
+      }
+      if (addonRefrigerio && addonRefrigerio.checked) {
+        const cost = 10000 * multiplier;
+        addonsCost += cost;
+        addons.push('Refrigerio (' + formatCurrency(cost) + ')');
+      }
+
+      const total = baseCost + addonsCost;
+      const title = addons.length ? baseLabel + ' + ' + addons.join(' + ') : baseLabel;
+      return [title, formatCurrency(total), total, addons];
     }
     const arrival = document.getElementById('llegada'); const departure = document.getElementById('salida');
     function updateDates() {
       if (!rateSelect || !departureLabel || !departure || !dateNote) return;
       const isAccommodation = rateSelect.value === 'alojamiento';
-      departureLabel.textContent = isAccommodation ? 'Fecha de salida' : 'Fecha de salida (solo alojamiento)'; departure.disabled = !isAccommodation; departure.required = isAccommodation;
+      departureLabel.textContent = isAccommodation ? 'Fecha de salida' : 'Fecha de salida (solo alojamiento)';
+      departure.disabled = !isAccommodation;
+      departure.required = isAccommodation;
       if (isAccommodation) departure.removeAttribute('readonly'); else departure.setAttribute('readonly', '');
-      dateNote.textContent = isAccommodation ? 'Elige tu fecha de salida. Se sugiere el día siguiente a la llegada.' : 'Este servicio se realiza durante el día; la fecha de salida no aplica.';
+      const nights = getNights();
+      dateNote.textContent = isAccommodation
+        ? ('Estadía: ' + nights + (nights === 1 ? ' noche' : ' noches') + '. El valor se calcula automáticamente según las fechas.')
+        : 'Este servicio se realiza durante el día; la fecha de salida no aplica.';
       if (!isAccommodation) departure.value = '';
     }
     function updateRate() {
       if (!rateName || !ratePrice) return;
-      const [name, price] = getRate(); const isAccommodation = rateSelect && rateSelect.value === 'alojamiento';
-      if (guestsInput) { guestsInput.max = isAccommodation ? '9' : ''; guestsInput.setCustomValidity(isAccommodation && Number(guestsInput.value) > 9 ? 'El alojamiento admite máximo 9 huéspedes.' : ''); }
-      rateName.textContent = name; ratePrice.textContent = price; updateDates();
+      updateDates();
+      const [name, price] = getRate();
+      const isAccommodation = rateSelect && rateSelect.value === 'alojamiento';
+      if (guestsInput) {
+        guestsInput.max = isAccommodation ? '9' : '';
+        guestsInput.setCustomValidity(isAccommodation && Number(guestsInput.value) > 9 ? 'El alojamiento admite máximo 9 huéspedes.' : '');
+      }
+      rateName.textContent = name;
+      ratePrice.textContent = price;
     }
     if (rateSelect) rateSelect.addEventListener('change', updateRate);
     if (guestsInput) guestsInput.addEventListener('input', updateRate);
     [addonDesayuno, addonAlmuerzo, addonRefrigerio].forEach((cb) => { if (cb) cb.addEventListener('change', updateRate); });
-    document.querySelectorAll('[data-rate]').forEach((button) => button.addEventListener('click', () => { const map = { 0: 'alojamiento', 4: 'pasadia', 5: 'fotografia', 6: 'bienestar' }; if (rateSelect) rateSelect.value = map[button.dataset.rate] || 'pasadia'; updateRate(); }));
+    document.querySelectorAll('[data-rate]').forEach((button) => button.addEventListener('click', () => {
+      const map = { 0: 'alojamiento', 4: 'pasadia', 5: 'fotografia', 6: 'bienestar' };
+      if (rateSelect) rateSelect.value = map[button.dataset.rate] || 'pasadia';
+      updateRate();
+    }));
     if (arrival && departure) {
       arrival.min = new Date().toISOString().split('T')[0];
-      arrival.addEventListener('change', () => { if (!arrival.value || (rateSelect && rateSelect.value !== 'alojamiento')) { departure.value = ''; return; } departure.min = arrival.value; if (!departure.value || departure.value <= arrival.value) { const nextDay = new Date(arrival.value + 'T12:00:00'); nextDay.setDate(nextDay.getDate() + 1); departure.value = nextDay.toISOString().split('T')[0]; } });
+      arrival.addEventListener('change', () => {
+        if (!arrival.value || (rateSelect && rateSelect.value !== 'alojamiento')) {
+          if (rateSelect && rateSelect.value !== 'alojamiento') departure.value = '';
+          updateRate();
+          return;
+        }
+        departure.min = arrival.value;
+        if (!departure.value || departure.value <= arrival.value) {
+          const nextDay = new Date(arrival.value + 'T12:00:00');
+          nextDay.setDate(nextDay.getDate() + 1);
+          departure.value = nextDay.toISOString().split('T')[0];
+        }
+        updateRate();
+      });
+      departure.addEventListener('change', () => {
+        if (departure.value && arrival.value && departure.value <= arrival.value) {
+          const nextDay = new Date(arrival.value + 'T12:00:00');
+          nextDay.setDate(nextDay.getDate() + 1);
+          departure.value = nextDay.toISOString().split('T')[0];
+        }
+        updateRate();
+      });
     }
     updateRate();
     const cotizaForm = document.getElementById('cotiza-form');
