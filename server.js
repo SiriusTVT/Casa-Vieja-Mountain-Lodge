@@ -4,6 +4,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { promisify } = require('node:util');
 const { MongoClient, ObjectId, GridFSBucket } = require('mongodb');
+const cms = require('./cms-engine.js');
 
 function loadEnvFile() {
   const envPath = path.join(__dirname, '.env');
@@ -437,6 +438,136 @@ async function handleAdminQuotesReport(request, response) {
   }
 }
 
+async function handleAdminCmsContent(request, response) {
+  if (!requireAdmin(request, response)) return;
+  try {
+    const database = await getDatabase().catch(() => null);
+    const draft = await cms.loadCmsDraft(database);
+    const published = await cms.loadCmsPublished(database);
+    const versions = await cms.listCmsVersions(database);
+    return sendJson(response, 200, {
+      ok: true,
+      draft,
+      publishedVersion: published.version || 1,
+      versionsCount: versions.length,
+      publishedAt: published.publishedAt || null,
+      publishedBy: published.publishedBy || null
+    });
+  } catch (error) {
+    console.error('Error cargando contenido CMS:', error.message);
+    return sendJson(response, 500, { ok: false, error: 'No se pudo cargar el contenido del sitio.' });
+  }
+}
+
+async function handleAdminCmsDraftSave(request, response) {
+  const session = requireAdmin(request, response);
+  if (!session) return;
+  try {
+    const payload = await readJson(request, 12 * 1024 * 1024);
+    if (!payload || !payload.draft) return sendJson(response, 400, { ok: false, error: 'Datos de borrador inválidos.' });
+    const database = await getDatabase().catch(() => null);
+    await cms.saveCmsDraft(database, payload.draft, session.username);
+    return sendJson(response, 200, { ok: true, updatedAt: new Date().toISOString() });
+  } catch (error) {
+    console.error('Error guardando borrador CMS:', error.message);
+    return sendJson(response, 500, { ok: false, error: 'No se pudo guardar el borrador.' });
+  }
+}
+
+async function handleAdminCmsPublish(request, response) {
+  const session = requireAdmin(request, response);
+  if (!session) return;
+  try {
+    const payload = await readJson(request, 12 * 1024 * 1024);
+    const database = await getDatabase().catch(() => null);
+    const dataToPublish = payload.data || (await cms.loadCmsDraft(database));
+    const note = payload.note || 'Publicación desde editor web';
+    const result = await cms.publishCms(database, dataToPublish, session.username, note);
+    return sendJson(response, 200, { ok: true, versionId: result.versionId, version: result.version, publishedAt: result.publishedAt });
+  } catch (error) {
+    console.error('Error publicando cambios CMS:', error.message);
+    return sendJson(response, 500, { ok: false, error: 'No se pudieron publicar los cambios.' });
+  }
+}
+
+async function handleAdminCmsDiscard(request, response) {
+  const session = requireAdmin(request, response);
+  if (!session) return;
+  try {
+    const database = await getDatabase().catch(() => null);
+    const published = await cms.loadCmsPublished(database);
+    await cms.saveCmsDraft(database, published, session.username);
+    return sendJson(response, 200, { ok: true, draft: published });
+  } catch (error) {
+    return sendJson(response, 500, { ok: false, error: 'No se pudieron descartar los cambios.' });
+  }
+}
+
+async function handleAdminCmsVersions(request, response) {
+  if (!requireAdmin(request, response)) return;
+  try {
+    const database = await getDatabase().catch(() => null);
+    const versions = await cms.listCmsVersions(database);
+    return sendJson(response, 200, { ok: true, versions });
+  } catch (error) {
+    return sendJson(response, 500, { ok: false, error: 'No se pudo obtener el historial de versiones.' });
+  }
+}
+
+async function handleAdminCmsVersionRestore(request, response, versionId) {
+  const session = requireAdmin(request, response);
+  if (!session) return;
+  try {
+    const database = await getDatabase().catch(() => null);
+    const result = await cms.restoreCmsVersion(database, versionId, session.username);
+    return sendJson(response, 200, { ok: true, message: 'Versión restaurada con éxito.', data: result.data });
+  } catch (error) {
+    return sendJson(response, 400, { ok: false, error: error.message || 'No se pudo restaurar la versión.' });
+  }
+}
+
+async function handleAdminCmsPreviewRender(request, response) {
+  if (!requireAdmin(request, response)) return;
+  try {
+    const payload = await readJson(request, 12 * 1024 * 1024);
+    const cmsData = payload.data || payload;
+    const html = cms.renderCmsPage(cmsData, { isPreview: true });
+    response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
+    return response.end(html);
+  } catch (error) {
+    console.error('Error renderizando vista previa:', error.message);
+    return send(response, 500, 'text/plain; charset=utf-8', 'Error renderizando vista previa');
+  }
+}
+
+async function handleAdminCmsMedia(request, response) {
+  if (!requireAdmin(request, response)) return;
+  try {
+    const localMedia = cms.getMediaLibraryAssets();
+    const database = await getDatabase().catch(() => null);
+    const gridFiles = [];
+    if (database) {
+      try {
+        const bucket = new GridFSBucket(database, { bucketName: 'imagenes' });
+        const cursor = bucket.find({}).sort({ uploadDate: -1 }).limit(100);
+        const docs = await cursor.toArray();
+        docs.forEach(doc => {
+          gridFiles.push({
+            url: `/media/${doc.filename}`,
+            name: (doc.metadata && doc.metadata.originalName) || doc.filename,
+            type: 'image',
+            uploaded: true
+          });
+        });
+      } catch (_) {}
+    }
+    const combined = [...gridFiles, ...localMedia];
+    return sendJson(response, 200, { ok: true, media: combined });
+  } catch (error) {
+    return sendJson(response, 500, { ok: false, error: 'No se pudo cargar la biblioteca de medios.' });
+  }
+}
+
 async function handlePaymentLink(request, response, quoteId) {
   if (!requireAdmin(request, response)) return;
   if (!ObjectId.isValid(quoteId)) return sendJson(response, 400, { ok: false, error: 'Cotización no válida.' });
@@ -522,7 +653,7 @@ async function handleQuote(request, response) {
   }
 }
 
-const server = http.createServer((request, response) => {
+const server = http.createServer(async (request, response) => {
   const requestPath = decodeURIComponent(request.url.split('?')[0]);
   if (requestPath === '/admin.html') return send(response, 404, 'text/plain; charset=utf-8', 'Página no encontrada');
   if (requestPath === '/api/cotizaciones' && request.method === 'POST') return void handleQuote(request, response);
@@ -534,6 +665,15 @@ const server = http.createServer((request, response) => {
   if (requestPath === '/api/admin/me' && request.method === 'GET') { const session = requireAdmin(request, response); return session ? sendJson(response, 200, { ok: true, username: session.username }) : undefined; }
   if (requestPath === '/api/admin/cotizaciones' && request.method === 'GET') return void handleAdminQuotes(request, response);
   if (requestPath === '/api/admin/cotizaciones/resumen' && request.method === 'GET') return void handleAdminQuotesReport(request, response);
+  if (requestPath === '/api/admin/cms/content' && request.method === 'GET') return void handleAdminCmsContent(request, response);
+  if (requestPath === '/api/admin/cms/draft' && request.method === 'POST') return void handleAdminCmsDraftSave(request, response);
+  if (requestPath === '/api/admin/cms/publish' && request.method === 'POST') return void handleAdminCmsPublish(request, response);
+  if (requestPath === '/api/admin/cms/discard' && request.method === 'POST') return void handleAdminCmsDiscard(request, response);
+  if (requestPath === '/api/admin/cms/versions' && request.method === 'GET') return void handleAdminCmsVersions(request, response);
+  if (requestPath === '/api/admin/cms/preview-render' && request.method === 'POST') return void handleAdminCmsPreviewRender(request, response);
+  if (requestPath === '/api/admin/cms/media' && request.method === 'GET') return void handleAdminCmsMedia(request, response);
+  const cmsRestoreMatch = requestPath.match(/^\/api\/admin\/cms\/versions\/([^/]+)\/restore$/);
+  if (cmsRestoreMatch && request.method === 'POST') return void handleAdminCmsVersionRestore(request, response, cmsRestoreMatch[1]);
   if (requestPath === '/api/admin/products' && request.method === 'GET') return void handleAdminProducts(request, response);
   if (requestPath === '/api/admin/products' && request.method === 'POST') return void handleAdminProductCreate(request, response);
   if (requestPath === '/api/admin/images' && request.method === 'POST') return void handleAdminImageUpload(request, response);
@@ -552,6 +692,19 @@ const server = http.createServer((request, response) => {
   if (requestPath.startsWith('/api/')) return sendJson(response, 404, { ok: false, error: 'Ruta API no encontrada' });
   const mediaMatch = requestPath.match(/^\/media\/([^/]+)$/);
   if (mediaMatch && request.method === 'GET') return void handleMedia(request, response, mediaMatch[1]);
+
+  if (requestPath === '/') {
+    try {
+      const database = await getDatabase().catch(() => null);
+      const published = await cms.loadCmsPublished(database).catch(() => null);
+      if (published && published.sections && published.sections.length) {
+        const html = cms.renderCmsPage(published, { isPreview: false });
+        return send(response, 200, 'text/html; charset=utf-8', html);
+      }
+    } catch (e) {
+      console.warn('Error sirviendo CMS publicado, usando index.html:', e.message);
+    }
+  }
 
   const relativePath = requestPath === '/' ? 'index.html' : requestPath === '/catalogo' ? 'catalogo.html' : requestPath === '/panel' ? 'admin.html' : requestPath.slice(1);
   const filePath = path.resolve(PUBLIC_ROOT, relativePath);

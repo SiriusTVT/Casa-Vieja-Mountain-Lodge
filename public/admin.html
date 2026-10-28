@@ -24,7 +24,7 @@
     </section>
     <section class="dashboard" id="dashboard" hidden>
          <header class="dashboard-header"><div><p class="eyebrow">Panel privado</p><h1>Cotizaciones</h1></div><div class="dashboard-actions"><button id="refresh-quotes" type="button">Actualizar</button><button id="logout">Cerrar sesión</button></div></header>
-      <div class="admin-tabs"><button type="button" class="admin-tab is-active" data-admin-tab="quotes">Cotizaciones</button><button type="button" class="admin-tab" data-admin-tab="products">Productos</button></div>
+      <div class="admin-tabs"><button type="button" class="admin-tab is-active" data-admin-tab="quotes">Cotizaciones</button><button type="button" class="admin-tab" data-admin-tab="products">Productos</button><button type="button" class="admin-tab" data-admin-tab="cms">Editor del sitio web</button></div>
       <section class="admin-panel" id="quotes-panel">
         <div class="quotes-report-card">
           <div class="quotes-report-header">
@@ -93,8 +93,216 @@
         </form>
         <div class="admin-products" id="admin-products"></div>
       </section>
+
+      <!-- Panel del Editor del Sitio Web (CMS) -->
+      <section class="admin-panel" id="cms-panel" hidden>
+        <div class="cms-topbar">
+          <div class="cms-topbar-left">
+            <span class="cms-badge" id="cms-status-badge">Cargando...</span>
+            <div class="cms-history-group">
+              <button type="button" class="cms-icon-btn" id="cms-undo-btn" title="Deshacer (Ctrl+Z)" disabled>↶ Deshacer</button>
+              <button type="button" class="cms-icon-btn" id="cms-redo-btn" title="Rehacer (Ctrl+Y)" disabled>↷ Rehacer</button>
+              <span class="cms-history-count" id="cms-history-indicator">0</span>
+            </div>
+          </div>
+          <div class="cms-topbar-center">
+            <div class="cms-device-group" role="group" aria-label="Dispositivo de vista previa">
+              <button type="button" class="cms-device-btn is-active" data-device="desktop" title="Vista de Escritorio">🖥️ Escritorio</button>
+              <button type="button" class="cms-device-btn" data-device="tablet" title="Vista de Tableta">💻 Tableta</button>
+              <button type="button" class="cms-device-btn" data-device="mobile" title="Vista de Móvil">📱 Móvil</button>
+            </div>
+            <div class="cms-mode-group">
+              <button type="button" class="cms-mode-btn is-active" id="cms-mode-edit" title="Modo interactivo de selección y edición">✎ Editar</button>
+              <button type="button" class="cms-mode-btn" id="cms-mode-preview" title="Vista previa limpia">👁️ Vista previa</button>
+            </div>
+          </div>
+          <div class="cms-topbar-right">
+            <button type="button" class="cms-tool-btn" id="cms-open-global-styles" title="Editar estilos globales y CSS">🎨 Estilos Globales</button>
+            <button type="button" class="cms-tool-btn" id="cms-open-versions" title="Historial y restaurar versiones">🕒 Versiones</button>
+            <button type="button" class="cms-tool-btn" id="cms-discard-btn" title="Descartar cambios pendientes">↺ Descartar</button>
+            <button type="button" class="cms-save-btn" id="cms-save-draft-btn">💾 Guardar borrador</button>
+            <button type="button" class="cms-publish-btn" id="cms-publish-btn">🚀 Publicar cambios</button>
+          </div>
+        </div>
+
+        <div class="cms-workspace">
+          <!-- Panel Izquierdo: Lista de Secciones -->
+          <aside class="cms-sidebar cms-sidebar-left">
+            <div class="cms-sidebar-header">
+              <div>
+                <h3>Estructura del sitio</h3>
+                <small id="cms-sections-count">0 secciones</small>
+              </div>
+              <button type="button" class="cms-primary-sm-btn" id="cms-add-section-btn">+ Sección</button>
+            </div>
+            <div class="cms-sections-tree" id="cms-sections-tree"></div>
+          </aside>
+
+          <!-- Centro: Lienzo de Vista Previa -->
+          <main class="cms-canvas">
+            <div class="cms-viewport-wrap" id="cms-viewport-wrap" data-viewport="desktop">
+              <div class="cms-viewport-header">
+                <span class="cms-viewport-dots"><i></i><i></i><i></i></span>
+                <span class="cms-viewport-url">casaviejamountainlodge.com</span>
+                <span class="cms-viewport-res" id="cms-viewport-res">100% · Escritorio</span>
+              </div>
+              <div class="cms-iframe-container">
+                <iframe id="cms-preview-iframe" title="Vista previa en tiempo real de Casa Vieja"></iframe>
+                <div class="cms-preview-loading" id="cms-preview-loading" hidden>
+                  <div class="cms-spinner"></div>
+                  <span>Renderizando vista previa...</span>
+                </div>
+              </div>
+            </div>
+          </main>
+
+          <!-- Panel Derecho: Inspector de Propiedades -->
+          <aside class="cms-sidebar cms-sidebar-right">
+            <div class="cms-inspector-header">
+              <div>
+                <span class="cms-inspector-eyebrow" id="cms-inspector-type">Sección</span>
+                <h3 id="cms-inspector-title">Selecciona una sección</h3>
+              </div>
+              <span class="cms-inspector-id" id="cms-inspector-id">#id</span>
+            </div>
+            <div class="cms-inspector-tabs">
+              <button type="button" class="cms-itab is-active" data-itab="content">Contenido</button>
+              <button type="button" class="cms-itab" data-itab="styles">Diseño & Estilos</button>
+              <button type="button" class="cms-itab" data-itab="css">CSS Scoped</button>
+            </div>
+            <div class="cms-inspector-body" id="cms-inspector-body">
+              <div class="cms-empty-inspector">Selecciona una sección en la lista de la izquierda o haz clic sobre ella en la vista previa para editar su contenido y diseño.</div>
+            </div>
+          </aside>
+        </div>
+      </section>
     </section>
+
+    <!-- Modales del CMS -->
+    <!-- Modal: Agregar Sección -->
+    <div class="cms-modal" id="cms-modal-add-section" hidden>
+      <div class="cms-modal-backdrop" data-close-modal="cms-modal-add-section"></div>
+      <div class="cms-modal-content">
+        <div class="cms-modal-header">
+          <h3>Agregar nueva sección</h3>
+          <button type="button" class="cms-modal-close" data-close-modal="cms-modal-add-section">✕</button>
+        </div>
+        <p class="cms-modal-sub">Elige una plantilla para crear e insertar una nueva sección en el sitio:</p>
+        <div class="cms-templates-grid">
+          <div class="cms-template-card" data-template-type="split">
+            <div class="cms-template-icon">📄</div>
+            <h4>Texto con Imagen</h4>
+            <p>Diseño editorial split con titular, texto, cifras, imagen y botón.</p>
+          </div>
+          <div class="cms-template-card" data-template-type="table">
+            <div class="cms-template-icon">📊</div>
+            <h4>Tabla de Información</h4>
+            <p>Tabla editable para tarifas, servicios o datos comparativos adaptables a móviles.</p>
+          </div>
+          <div class="cms-template-card" data-template-type="cards">
+            <div class="cms-template-icon">🗂️</div>
+            <h4>Cuadrícula de Tarjetas</h4>
+            <p>Bloques de experiencias o servicios con fotos, números y enlaces.</p>
+          </div>
+          <div class="cms-template-card" data-template-type="gallery">
+            <div class="cms-template-icon">🖼️</div>
+            <h4>Galería de Fotos</h4>
+            <p>Mosaico de imágenes con pies de foto y composiciones dinámicas.</p>
+          </div>
+          <div class="cms-template-card" data-template-type="banner_cta">
+            <div class="cms-template-icon">📣</div>
+            <h4>Banner de Llamado a la Acción</h4>
+            <p>Banda destacada de alto impacto con botón directo de contacto.</p>
+          </div>
+          <div class="cms-template-card" data-template-type="rich_text">
+            <div class="cms-template-icon">✍️</div>
+            <h4>Texto Enriquecido</h4>
+            <p>Párrafos, títulos, listas y contenido libre para comunicados o guías.</p>
+          </div>
+          <div class="cms-template-card" data-template-type="timeline">
+            <div class="cms-template-icon">⏳</div>
+            <h4>Línea de Tiempo</h4>
+            <p>Itinerario cronológico o pasos sucesivos de una experiencia.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Biblioteca de Medios -->
+    <div class="cms-modal" id="cms-modal-media" hidden>
+      <div class="cms-modal-backdrop" data-close-modal="cms-modal-media"></div>
+      <div class="cms-modal-content cms-modal-lg">
+        <div class="cms-modal-header">
+          <h3>Biblioteca de medios e imágenes</h3>
+          <button type="button" class="cms-modal-close" data-close-modal="cms-modal-media">✕</button>
+        </div>
+        <div class="cms-media-tabs-bar">
+          <label class="cms-primary-sm-btn" style="cursor:pointer;">
+            📤 Subir desde tu equipo
+            <input type="file" id="cms-media-file-input" accept="image/*,video/mp4" style="display:none;">
+          </label>
+          <div class="cms-media-url-wrap">
+            <input type="text" id="cms-media-url-input" class="cms-form-input" placeholder="O pega una URL/ruta directa...">
+            <button type="button" class="cms-secondary-sm-btn" id="cms-media-url-submit">Usar URL</button>
+          </div>
+        </div>
+        <div class="cms-media-grid" id="cms-media-grid"></div>
+      </div>
+    </div>
+
+    <!-- Modal: Estilos Globales & CSS -->
+    <div class="cms-modal" id="cms-modal-global" hidden>
+      <div class="cms-modal-backdrop" data-close-modal="cms-modal-global"></div>
+      <div class="cms-modal-content">
+        <div class="cms-modal-header">
+          <h3>Estilos Globales & Personalización CSS</h3>
+          <button type="button" class="cms-modal-close" data-close-modal="cms-modal-global">✕</button>
+        </div>
+        <div class="cms-global-form">
+          <h4>Paleta de Colores del Sitio</h4>
+          <div class="cms-color-grid-form">
+            <label class="cms-form-label"><span>Color de Títulos</span><input type="color" id="glob-heading-color"></label>
+            <label class="cms-form-label"><span>Color de Texto</span><input type="color" id="glob-body-color"></label>
+            <label class="cms-form-label"><span>Color Primario (Vino)</span><input type="color" id="glob-accent-dark"></label>
+            <label class="cms-form-label"><span>Color Acento (Crema)</span><input type="color" id="glob-accent-light"></label>
+            <label class="cms-form-label"><span>Fondo Claro</span><input type="color" id="glob-bg-light"></label>
+            <label class="cms-form-label"><span>Fondo Oscuro</span><input type="color" id="glob-bg-dark"></label>
+          </div>
+          <h4>Tipografía Principal</h4>
+          <label class="cms-form-label">
+            <span>Familia tipográfica (Serif)</span>
+            <select class="cms-form-select" id="glob-font-family">
+              <option value="Georgia, 'Times New Roman', serif">Georgia (Elegante Clásico)</option>
+              <option value="'Playfair Display', Georgia, serif">Playfair Display (Editorial)</option>
+              <option value="'Times New Roman', Times, serif">Times New Roman (Clásico)</option>
+              <option value="Arial, Helvetica, sans-serif">Arial / Sans-Serif (Moderno)</option>
+              <option value="system-ui, -apple-system, sans-serif">Sistema Nativo (Limpio)</option>
+            </select>
+          </label>
+          <h4>CSS Global Personalizado</h4>
+          <p class="cms-field-hint">Añade reglas CSS aplicadas a toda la página. Los estilos tienen vista previa inmediata.</p>
+          <textarea class="cms-code-editor" id="glob-custom-css" rows="6" placeholder="/* CSS global para todo el sitio */&#10;.site-header { ... }"></textarea>
+          <div style="margin-top:16px;text-align:right;">
+            <button type="button" class="button" id="cms-save-global-btn">Aplicar Estilos Globales</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Historial de Versiones -->
+    <div class="cms-modal" id="cms-modal-versions" hidden>
+      <div class="cms-modal-backdrop" data-close-modal="cms-modal-versions"></div>
+      <div class="cms-modal-content">
+        <div class="cms-modal-header">
+          <h3>Historial de versiones publicadas</h3>
+          <button type="button" class="cms-modal-close" data-close-modal="cms-modal-versions">✕</button>
+        </div>
+        <p class="cms-modal-sub">Puedes inspeccionar o restaurar copias de seguridad de versiones anteriores publicadas:</p>
+        <div class="cms-versions-list" id="cms-versions-list"></div>
+      </div>
+    </div>
   </main>
+  <script src="/admin-cms.js"></script>
   <script src="/admin.js"></script>
 </body>
 </html>

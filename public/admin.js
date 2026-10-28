@@ -128,12 +128,19 @@ async function loadProducts() {
 }
 
 document.querySelectorAll('[data-admin-tab]').forEach((tab) => tab.addEventListener('click', async () => {
+  const currentTab = tab.dataset.adminTab;
   document.querySelectorAll('[data-admin-tab]').forEach((item) => item.classList.toggle('is-active', item === tab));
-  const productsTab = tab.dataset.adminTab === 'products';
-  document.getElementById('quotes-panel').hidden = productsTab;
-  document.getElementById('products-panel').hidden = !productsTab;
-  if (productsTab) {
+  document.getElementById('quotes-panel').hidden = currentTab !== 'quotes';
+  document.getElementById('products-panel').hidden = currentTab !== 'products';
+  const cmsPanel = document.getElementById('cms-panel');
+  if (cmsPanel) cmsPanel.hidden = currentTab !== 'cms';
+  const shell = document.querySelector('.admin-shell');
+  if (shell) shell.classList.toggle('cms-mode-active', currentTab === 'cms');
+
+  if (currentTab === 'products') {
     try { await loadProducts(); } catch (error) { productsStatus.textContent = error.message; }
+  } else if (currentTab === 'cms') {
+    if (window.initCmsEditor) window.initCmsEditor();
   }
 }));
 
