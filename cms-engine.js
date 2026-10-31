@@ -375,8 +375,8 @@ function getDefaultCmsData() {
         content: {
           eyebrow: "Planifica tu visita",
           eyebrowDark: true,
-          title: "Hablemos de tu próxima pausa.",
-          description: "Déjanos tu nombre y contacto y te enviaremos una propuesta hecha a tu medida.",
+          title: "¿Deseas conocer más del lugar?",
+          description: "Déjanos tu contacto y nosotros te haremos llegar la información y la cotización.",
           address: "Km 1 Vía La Ruiza, Buitrera Palmira, Valle del Cauca",
           mapsEmbedUrl: "https://www.google.com/maps?q=Casa+Vieja+Mountain+Lodge,+La+Buitrera,+Palmira,+Valle+del+Cauca&output=embed",
           mapsUrl: "https://www.google.com/maps/dir/?api=1&origin=Current+Location&destination=Casa+Vieja+Mountain+Lodge%2C+La+Buitrera%2C+Palmira%2C+Valle+del+Cauca",
@@ -678,7 +678,7 @@ function renderSectionHtml(section, isPreview = false) {
             <label for="email">Correo electrónico</label><input type="email" id="email" name="email" required placeholder="ejemplo@correo.com">
             <label for="telefono">Teléfono / WhatsApp</label><input type="tel" id="telefono" name="telefono" required placeholder="+57 300 000 0000">
             <div class="date-group">
-              <div><label for="llegada">Fecha de llegada</label><input type="date" id="llegada" name="llegada" required></div>
+              <div><label for="llegada">Fecha tentativa de llegada</label><input type="date" id="llegada" name="llegada" required></div>
               <div><label for="salida">Fecha de salida</label><input type="date" id="salida" name="salida" readonly required></div>
             </div>
             <p class="form-note">La salida se calcula automáticamente para el día siguiente.</p>
@@ -768,12 +768,33 @@ function renderSectionHtml(section, isPreview = false) {
   }
 }
 
+const SOCIAL_NETWORKS = [
+  { key: 'instagram', pattern: /instagram/i },
+  { key: 'facebook', pattern: /facebook|fb\.com/i },
+  { key: 'tiktok', pattern: /tiktok/i }
+];
+
+function socialNetworkKey(link = {}) {
+  const haystack = `${link.label || ''} ${link.url || ''}`;
+  const match = SOCIAL_NETWORKS.find((network) => network.pattern.test(haystack));
+  return match ? match.key : '';
+}
+
+function renderSocialLink(link = {}) {
+  const key = socialNetworkKey(link);
+  const label = sanitizeText(link.label || '');
+  const url = sanitizeText(link.url || '#');
+  if (!key) return `<a class="social-link social-link--text" href="${url}" target="_blank" rel="noopener">${label}</a>`;
+  return `<a class="social-link social-link--${key}" href="${url}" target="_blank" rel="noopener" aria-label="${label}" title="${label}"></a>`;
+}
+
 function renderCmsPage(cmsData, options = {}) {
   const isPreview = Boolean(options.isPreview);
   const data = cmsData || getDefaultCmsData();
   const global = data.globalStyles || {};
   const header = data.header || {};
   const footer = data.footer || {};
+  const socialLinks = footer.socialLinks || [];
   const sections = data.sections || [];
 
   // Scoped section custom styles
@@ -941,6 +962,7 @@ function renderCmsPage(cmsData, options = {}) {
           ${header.catalogBtn ? `<a class="nav-catalog" href="${sanitizeText(header.catalogBtn.url || '/catalogo')}">${sanitizeText(header.catalogBtn.label || 'Catálogo')}</a>` : ''}
           ${header.ctaBtn ? `<a class="nav-cta" href="${sanitizeText(header.ctaBtn.url || '#contacto')}">${sanitizeText(header.ctaBtn.label || 'Cotizar')}</a>` : ''}
         </span>
+        ${socialLinks.length ? `<span class="nav-social" aria-label="Redes sociales">${socialLinks.map(renderSocialLink).join('')}</span>` : ''}
       </div>
     </nav>
     ${heroSection ? renderSectionHtml(heroSection, isPreview) : ''}
@@ -954,8 +976,8 @@ function renderCmsPage(cmsData, options = {}) {
   <footer class="footer">
     <span>${sanitizeText(footer.brand || 'Casa Vieja Mountain Lodge')}</span>
     <span>${sanitizeText(footer.sub || 'Historia · Aves · Bienestar · RNT 169434')}</span>
-    <div>
-      ${(footer.socialLinks || []).map(sl => `<a href="${sanitizeText(sl.url || '#')}" target="_blank" rel="noopener">${sanitizeText(sl.label || '')}</a>`).join('')}
+    <div class="footer-social" aria-label="Redes sociales">
+      ${socialLinks.map(renderSocialLink).join('')}
     </div>
   </footer>
   <script>
