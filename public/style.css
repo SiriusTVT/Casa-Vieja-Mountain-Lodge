@@ -69,6 +69,7 @@ h1 span { font-size: .72em; letter-spacing: -.01em; }
 .intro-copy { max-width: 570px; }
 h2 { margin-bottom: 25px; color: var(--text-heading); font-size: clamp(40px, 5.6vw, 84px); font-weight: 600; letter-spacing: -.04em; line-height: 1.1; }
 .dark-band h2 { color: var(--text-light); }
+.dark-band .large-copy { color: var(--text-light); }
 .intro-lead, .large-copy { color: var(--text-body); font-size: clamp(20px, 2.1vw, 27px); line-height: 1.6; }
 .intro-copy > p:not(.eyebrow):not(.intro-lead) { max-width: 510px; margin-bottom: 28px; font-size: 17px; color: var(--text-body); }
 .intro-image { margin: 0; }
